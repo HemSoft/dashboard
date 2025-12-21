@@ -1,0 +1,18 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+end_of_line = lf
+
+[*.{cs,vb}]
+# Place using statements inside the namespace
+dotnet_separate_import_directive_groups = true
+dotnet_sort_system_directives_first = true
+csharp_using_directive_placement = inside_namespace:error
+
+# Do not allow unused using statements
+dotnet_remove_unnecessary_import_directives = true:error
