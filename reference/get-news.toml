@@ -1,0 +1,65 @@
+# Get News Configuration
+# RSS feed sources for news aggregation
+
+[settings]
+refresh_interval_minutes = 5
+max_items = 20
+max_age_days = 5
+
+[[sources]]
+name = "Hacker News"
+url = "https://news.ycombinator.com/rss"
+enabled = true
+category = "Tech"
+
+# Note: HN only has ONE RSS feed. The other endpoints are JSON APIs.
+# The main RSS feed includes top/front page stories (30 items max).
+# To get Ask HN, Show HN, or other categories, you'd need custom JSON parsing.
+
+[[sources]]
+name = "AP"
+url = "https://feedx.net/rss/ap.xml"
+enabled = true
+category = "World"
+
+[[sources]]
+name = "BBC Tech"
+url = "https://feeds.bbci.co.uk/news/technology/rss.xml"
+enabled = true
+category = "Tech"
+
+[[sources]]
+name = "NPR News"
+url = "https://feeds.npr.org/1001/rss.xml"
+enabled = true
+category = "World"
+
+[[sources]]
+name = "NPR Tech"
+url = "https://feeds.npr.org/1019/rss.xml"
+enabled = true
+category = "Tech"
+
+[[sources]]
+name = "DR Nyheder"
+url = "https://www.dr.dk/nyheder/service/feeds/allenyheder"
+enabled = true
+category = "Denmark"
+
+[[sources]]
+name = "MIT Tech AI"
+url = "https://www.technologyreview.com/topic/artificial-intelligence/feed"
+enabled = true
+category = "AI"
+
+[[sources]]
+name = "VentrB AI"
+url = "https://venturebeat.com/category/ai/feed/"
+enabled = true
+category = "AI"
+
+[[sources]]
+name = "VS Code"
+url = "https://code.visualstudio.com/feed.xml"
+enabled = true
+category = "Tech"

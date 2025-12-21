@@ -1,0 +1,93 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { NewsWidget } from "./news-widget";
+
+vi.mock("../actions", () => ({
+  fetchNews: vi.fn().mockResolvedValue([
+    {
+      id: "1",
+      title: "First News Item",
+      summary: "Summary 1",
+      source: "Source 1",
+      url: "https://example.com/1",
+      publishedAt: new Date("2025-12-20T10:00:00Z"),
+      category: "dev",
+    },
+    {
+      id: "2",
+      title: "Second News Item",
+      summary: "Summary 2",
+      source: "Source 2",
+      url: "https://example.com/2",
+      publishedAt: new Date("2025-12-19T10:00:00Z"),
+      category: "ai",
+    },
+    {
+      id: "3",
+      title: "Third News Item",
+      summary: "Summary 3",
+      source: "Source 3",
+      url: "https://example.com/3",
+      publishedAt: new Date("2025-12-18T10:00:00Z"),
+      category: "tech",
+    },
+    {
+      id: "4",
+      title: "Fourth News Item",
+      summary: "Summary 4",
+      source: "Source 4",
+      url: "https://example.com/4",
+      publishedAt: new Date("2025-12-17T10:00:00Z"),
+      category: "general",
+    },
+  ]),
+}));
+
+describe("NewsWidget", () => {
+  it("renders widget header", async () => {
+    const Widget = await NewsWidget({});
+    render(Widget);
+
+    expect(screen.getByText("News")).toBeDefined();
+    expect(screen.getByText("Latest updates from your sources")).toBeDefined();
+  });
+
+  it("renders View All link", async () => {
+    const Widget = await NewsWidget({});
+    render(Widget);
+
+    const viewAllLink = screen.getByRole("link", { name: /view all/i });
+    expect(viewAllLink.getAttribute("href")).toBe("/news");
+  });
+
+  it("renders default 3 items", async () => {
+    const Widget = await NewsWidget({});
+    render(Widget);
+
+    expect(screen.getByText("First News Item")).toBeDefined();
+    expect(screen.getByText("Second News Item")).toBeDefined();
+    expect(screen.getByText("Third News Item")).toBeDefined();
+    expect(screen.queryByText("Fourth News Item")).toBeNull();
+  });
+
+  it("respects maxItems prop", async () => {
+    const Widget = await NewsWidget({ maxItems: 2 });
+    render(Widget);
+
+    expect(screen.getByText("First News Item")).toBeDefined();
+    expect(screen.getByText("Second News Item")).toBeDefined();
+    expect(screen.queryByText("Third News Item")).toBeNull();
+  });
+});
+
+describe("NewsWidget empty state", () => {
+  it("shows empty message when no items", async () => {
+    const { fetchNews } = await import("../actions");
+    vi.mocked(fetchNews).mockResolvedValueOnce([]);
+
+    const Widget = await NewsWidget({});
+    render(Widget);
+
+    expect(screen.getByText("No news items available")).toBeDefined();
+  });
+});

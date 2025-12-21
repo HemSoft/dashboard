@@ -14,6 +14,7 @@ import {
     ChevronRight,
     Database,
     LayoutDashboard,
+    Newspaper,
     Settings,
     User,
     Zap,
@@ -23,6 +24,7 @@ import { usePathname } from "next/navigation";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "News", href: "/news", icon: Newspaper },
   { name: "Data Explorer", href: "#", icon: Database },
   { name: "Integrations", href: "#", icon: Zap },
   { name: "Settings", href: "#", icon: Settings },

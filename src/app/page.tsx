@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
+import { NewsWidget } from "@/modules/news";
 import { Activity, Clock, Download, MoreHorizontal, Plus, Users } from "lucide-react";
 import { addDemoRecord } from "./actions";
 
@@ -87,21 +88,9 @@ export default async function Home() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-7">
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Add Record</CardTitle>
-            <CardDescription>Create a new entry in the Supabase database.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form action={addDemoRecord} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">Record Name</label>
-                <Input id="name" name="name" placeholder="Enter record name..." required />
-              </div>
-              <Button type="submit" className="w-full">Create Record</Button>
-            </form>
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-3">
+          <NewsWidget />
+        </div>
 
         <Card className="lg:col-span-4">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -152,6 +141,22 @@ export default async function Home() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Add Record</CardTitle>
+          <CardDescription>Create a new entry in the Supabase database.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={addDemoRecord} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium">Record Name</label>
+              <Input id="name" name="name" placeholder="Enter record name..." required />
+            </div>
+            <Button type="submit" className="w-full">Create Record</Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

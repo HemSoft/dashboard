@@ -20,6 +20,10 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve(mockSupabase)),
 }))
 
+vi.mock('@/modules/news', () => ({
+  NewsWidget: () => <div data-testid="news-widget">News Widget</div>,
+}))
+
 describe('Home Page', () => {
   it('renders the dashboard with records', async () => {
     const Page = await Home()
@@ -27,6 +31,7 @@ describe('Home Page', () => {
 
     expect(screen.getByText('Dashboard')).toBeDefined()
     expect(screen.getByText('Total Records')).toBeDefined()
+    expect(screen.getByTestId('news-widget')).toBeDefined()
 
     // Check total records count in the card
     const totalRecordsCard = screen.getByText('Total Records').closest('[data-slot="card"]')

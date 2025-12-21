@@ -13,6 +13,7 @@ This project follows the **StackProbe** protocol. All agents and contributors mu
 - **Components**: shadcn/ui (Tailwind CSS 4).
 - **Layout**: Responsive, mobile-first, with subtle glassmorphism effects.
 - **Theming**: Multiple theme palettes (default, ocean, forest, sunset) with light/dark mode support. See `.claude/skills/theming/SKILL.md` for expert guidance on creating and modifying themes.
+- **Debugging**: For visual/UI debugging issues, use the `.claude/skills/frontend-debugging/SKILL.md` skill with browser DevTools to inspect computed styles and spacing.
 
 ## Tech Stack
 - **Runtime**: Bun
@@ -35,6 +36,31 @@ This project follows the **StackProbe** protocol. All agents and contributors mu
 ## Database Migrations
 - **Push Migrations**: Use `npx supabase db push --yes` to push migrations non-interactively.
 - **Generate Types**: Run `bun db:types` after schema changes to regenerate `src/lib/supabase/database.types.ts`.
+
+## Module Architecture
+
+Dashboard features are organized as **Modules**. Each module provides both a **Widget** (compact dashboard card) and a **Page** (full-screen view).
+
+### Vocabulary
+| Term | Definition |
+|------|------------|
+| **Widget** | Compact dashboard component showing summarized data |
+| **Page** | Dedicated route with full feature experience |
+| **Insight** | Informational module (read-only) |
+| **Action** | Utility module (interactive/mutating) |
+| **Module** | Complete feature encompassing widget + page |
+
+### Module Structure
+```
+src/modules/<module-name>/
+  components/           # Module-specific components
+    <name>-widget.tsx   # Widget for dashboard
+  page.tsx              # Full page component
+  actions.ts            # Server actions
+  types.ts              # TypeScript types
+```
+
+See `VISION.md` for the full roadmap.
 
 ## Agentic Workflow
 - **Plan-First**: Always present a plan before making modifications.
