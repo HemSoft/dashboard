@@ -1,12 +1,31 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
-// Mock Supabase or other globals if needed
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
+// Global mocks for Supabase
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn(() => Promise.resolve({
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
     })),
-  },
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }),
+      getSession: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
+    },
+  })),
+}))
+
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: vi.fn(() => ({
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+    })),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }),
+      getSession: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
+    },
+  })),
 }))
