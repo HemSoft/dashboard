@@ -18,7 +18,14 @@ export default async function Home() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) console.error("Error fetching records:", error);
+  if (error) {
+    console.error("Error fetching records:", {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    });
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-4 font-sans dark:bg-black sm:p-24">
