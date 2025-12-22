@@ -105,7 +105,7 @@ export function Header() {
       </div>
 
       {/* Center: Date/Time Display */}
-      <DateTimeDisplay className="hidden md:flex" />
+      <DateTimeDisplay className="hidden md:flex mr-6" />
 
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon">
