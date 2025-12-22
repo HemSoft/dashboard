@@ -35,8 +35,8 @@ jobs:
           # Get current date in MM/DD/YYYY format
           NEW_DATE=$(date +"%m/%d/%Y")
 
-          # Update the file
-          sed -i "s/APP_VERSION = \".*\"/APP_VERSION = \"$NEW_VERSION - $NEW_DATE\"/" "$VERSION_FILE"
+          # Update the file (use | as delimiter since date contains /)
+          sed -i "s|APP_VERSION = \".*\"|APP_VERSION = \"$NEW_VERSION - $NEW_DATE\"|" "$VERSION_FILE"
 
           echo "Bumped version: $CURRENT -> $NEW_VERSION ($NEW_DATE)"
 
