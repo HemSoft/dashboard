@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 // Mock createClient from supabase-js
+const mockFrom = vi.fn().mockReturnThis();
 const mockCreateClient = vi.fn(() => ({
-  from: vi.fn().mockReturnThis(),
+  from: mockFrom,
   select: vi.fn().mockReturnThis(),
 }));
 
@@ -20,9 +21,15 @@ vi.mock("../env", () => ({
 }));
 
 describe("supabaseAdmin", () => {
-  it("creates admin client with correct configuration", async () => {
+  it("creates admin client lazily when from() is called", async () => {
     // Import after mocks are set up
     const { supabaseAdmin } = await import("./admin");
+
+    // Client not created yet (lazy)
+    expect(mockCreateClient).not.toHaveBeenCalled();
+
+    // Trigger lazy initialization by calling from()
+    supabaseAdmin.from("test_table");
 
     expect(mockCreateClient).toHaveBeenCalledWith(
       "https://test.supabase.co",
@@ -34,6 +41,15 @@ describe("supabaseAdmin", () => {
         },
       }
     );
-    expect(supabaseAdmin).toBeDefined();
+    expect(mockFrom).toHaveBeenCalledWith("test_table");
+  });
+
+  it("getSupabaseAdmin returns the same instance", async () => {
+    const { getSupabaseAdmin } = await import("./admin");
+
+    const client1 = getSupabaseAdmin();
+    const client2 = getSupabaseAdmin();
+
+    expect(client1).toBe(client2);
   });
 });
