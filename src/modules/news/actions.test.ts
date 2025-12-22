@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchNews } from "./actions";
+import { fetchNews, revalidateNews } from "./actions";
 
 vi.mock("./lib/fetcher", () => ({
   fetchAllNews: vi.fn().mockResolvedValue({
@@ -18,6 +18,11 @@ vi.mock("./lib/fetcher", () => ({
   }),
 }));
 
+const mockRevalidatePath = vi.fn();
+vi.mock("next/cache", () => ({
+  revalidatePath: (path: string) => mockRevalidatePath(path),
+}));
+
 describe("News Actions", () => {
   describe("fetchNews", () => {
     it("returns news items and errors", async () => {
@@ -25,6 +30,14 @@ describe("News Actions", () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].title).toBe("Test News");
       expect(result.errors).toHaveLength(0);
+    });
+  });
+
+  describe("revalidateNews", () => {
+    it("calls revalidatePath with /news", async () => {
+      mockRevalidatePath.mockClear();
+      await revalidateNews();
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/news");
     });
   });
 });

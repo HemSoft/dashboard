@@ -15,23 +15,23 @@ The dashboard is a **unified command center** for monitoring and interacting wit
 
 Read-only features that surface information from external sources.
 
-| Feature | Description | Data Sources |
-|---------|-------------|--------------|
-| News | Aggregated news/updates | RSS, APIs |
-| Usage | Resource consumption stats | Supabase, Vercel, GitHub Copilot, OpenRouter |
-| PR Status | Pull request activity | GitHub |
-| Notifications | System alerts | Windows, custom |
-| Mail | Email summaries | Outlook, Gmail |
+| Feature | Status | Description | Data Sources |
+|---------|--------|-------------|--------------|
+| News | ✅ Complete | Aggregated news/updates | RSS feeds |
+| PR Status | ✅ Complete | Pull request activity | GitHub API |
+| Usage | Planned | Resource consumption stats | Supabase, Vercel, GitHub Copilot, OpenRouter |
+| Notifications | Planned | System alerts | Windows, custom |
+| Mail | Planned | Email summaries | Outlook, Gmail |
 
 ### 2. Actions (Utilities)
 
 Interactive features that trigger operations or workflows.
 
-| Feature | Description | Capabilities |
-|---------|-------------|--------------|
-| Agent Runner | Trigger agentic workflows | Custom automation |
-| AI Chat | Conversational interface | OpenAI, Anthropic |
-| Quick Actions | One-click operations | Various integrations |
+| Feature | Status | Description | Capabilities |
+|---------|--------|-------------|--------------|
+| Agent Runner | Planned | Trigger agentic workflows | Custom automation |
+| AI Chat | Planned | Conversational interface | OpenAI, Anthropic |
+| Quick Actions | Planned | One-click operations | Various integrations |
 
 ## Vocabulary
 
@@ -50,35 +50,48 @@ Each **Module** consists of:
 ```
 src/
   modules/
-    news/                    # Module directory
+    <module-name>/           # Module directory
       components/
-        news-widget.tsx      # Widget component
-        news-list.tsx        # Shared list component
-        news-item.tsx        # Shared item component
-      page.tsx               # Full page (/news route)
+        <name>-widget.tsx    # Widget component
+        <name>-item.tsx      # Item component
       actions.ts             # Server actions
       types.ts               # TypeScript types
+      lib/                   # Module-specific utilities
+  app/
+    <module-name>/
+      page.tsx               # Full page route
 ```
 
 The dashboard home page imports and renders widgets from each module.
 
 ## Implementation Roadmap
 
-### Phase 1: Foundation
-- [ ] Establish module structure
-- [ ] Create base widget component/pattern
-- [ ] Define shared types for widgets
+### Phase 1: Foundation ✅
+- [x] Establish module structure
+- [x] Create base UI components (Card, Button, Badge, etc.)
+- [x] Define shared types for widgets
+- [x] Set up theming system (4 themes: default, ocean, forest, sunset)
+- [x] Implement Supabase authentication
+- [x] Configure 100% test coverage requirement
 
-### Phase 2: News Module (First Module)
-- [ ] News widget (dashboard card)
-- [ ] News page (full view at `/news`)
-- [ ] Mock data for initial development
-- [ ] Wire up real data sources later (RSS, APIs)
+### Phase 2: News Module ✅
+- [x] News widget (dashboard card)
+- [x] News page (full view at `/news`)
+- [x] RSS feed parsing with real data sources
+- [x] News item components
+- [x] Refresh functionality
 
-### Phase 3: Additional Modules
+### Phase 3: GitHub PRs Module ✅
+- [x] PR widget (dashboard card)
+- [x] PR page (full view at `/prs`)
+- [x] GitHub API integration
+- [x] PR tree view (grouped by repository)
+- [x] PR item components
+
+### Phase 4: Additional Modules
 - [ ] Usage stats module
-- [ ] PR status module
-- [ ] Additional modules as needed
+- [ ] Notifications module
+- [ ] Mail module
 
 ## Design Principles
 
@@ -86,14 +99,26 @@ The dashboard home page imports and renders widgets from each module.
 2. **Consistency**: All modules follow the same structure
 3. **Independence**: Modules are self-contained and can be enabled/disabled
 4. **Real-time Ready**: Architecture supports live updates via Supabase Realtime or polling
+5. **100% Test Coverage**: All code must have complete test coverage
 
-## Next Steps
+## Tech Stack
 
-1. **Create the module structure** under `src/modules/`
-2. **Build a base `Widget` component** in `src/components/ui/` that provides the card shell
-3. **Implement the News module** as the reference implementation
-4. **Refactor the existing "Recent Records" card** to follow the widget pattern
+| Layer | Technology |
+|-------|------------|
+| Runtime | Bun |
+| Frontend | Next.js 16+ (App Router) |
+| UI | shadcn/ui + Tailwind CSS 4 |
+| Database/Auth | Supabase Cloud |
+| Deployment | Vercel |
+| Testing | Vitest + Testing Library |
+
+## Current Status
+
+- **Modules Complete**: 2 (News, GitHub PRs)
+- **Test Coverage**: 100%
+- **Themes Available**: 4 (default, ocean, forest, sunset)
+- **Active Routes**: `/`, `/news`, `/prs`, `/login`, `/signup`, `/account`
 
 ---
 
-*Last updated: 2025-12-21*
+*Last updated: 2025-12-22*

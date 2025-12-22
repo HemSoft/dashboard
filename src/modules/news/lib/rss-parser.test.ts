@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { RssSource } from "../types";
 import {
-    extractLink,
-    extractText,
-    generateId,
-    parseDate,
-    parseRssFeed,
-    stripHtml,
-    truncate,
+  extractLink,
+  extractText,
+  generateId,
+  parseDate,
+  parseRssFeed,
+  stripHtml,
+  truncate,
 } from "./rss-parser";
 
 describe("RSS Parser", () => {
@@ -582,6 +582,66 @@ describe("RSS Parser", () => {
       const items = parseRssFeed(xml, source);
       expect(items).toHaveLength(1);
       expect(items[0].url).toBe("https://example.com/actual");
+    });
+
+    it("skips items with 'Comments' title (Hacker News comment links)", () => {
+      const xml = `<?xml version="1.0"?>
+        <rss version="2.0">
+          <channel>
+            <item>
+              <title>Comments</title>
+              <link>https://news.ycombinator.com/item?id=123</link>
+              <pubDate>Sat, 21 Dec 2025 10:00:00 GMT</pubDate>
+            </item>
+            <item>
+              <title>Real Article Title</title>
+              <link>https://example.com/article</link>
+              <pubDate>Sat, 21 Dec 2025 10:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>`;
+
+      const items = parseRssFeed(xml, source);
+      expect(items).toHaveLength(1);
+      expect(items[0].title).toBe("Real Article Title");
+    });
+
+    it("skips items with very short titles (less than 5 characters)", () => {
+      const xml = `<?xml version="1.0"?>
+        <rss version="2.0">
+          <channel>
+            <item>
+              <title>Hi</title>
+              <link>https://example.com/short</link>
+              <pubDate>Sat, 21 Dec 2025 10:00:00 GMT</pubDate>
+            </item>
+            <item>
+              <title>Valid Title Here</title>
+              <link>https://example.com/valid</link>
+              <pubDate>Sat, 21 Dec 2025 10:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>`;
+
+      const items = parseRssFeed(xml, source);
+      expect(items).toHaveLength(1);
+      expect(items[0].title).toBe("Valid Title Here");
+    });
+
+    it("skips items with 'comments' title case-insensitively", () => {
+      const xml = `<?xml version="1.0"?>
+        <rss version="2.0">
+          <channel>
+            <item>
+              <title>COMMENTS</title>
+              <link>https://example.com/comments</link>
+              <pubDate>Sat, 21 Dec 2025 10:00:00 GMT</pubDate>
+            </item>
+          </channel>
+        </rss>`;
+
+      const items = parseRssFeed(xml, source);
+      expect(items).toHaveLength(0);
     });
   });
 });

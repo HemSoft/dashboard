@@ -101,12 +101,15 @@ export function parseDate(dateStr: unknown): Date | null {
 
 /**
  * Extract summary from description or content:encoded fields.
+ * Filters out HN-style "Comments" only descriptions.
  */
 function extractSummary(item: Record<string, unknown>): string {
   const description = extractText(
     item["description"] || item["content:encoded"] || item["summary"] || item["content"] || ""
   );
   const stripped = stripHtml(description);
+  // Filter out HN "Comments" links that appear as the only content
+  if (stripped.toLowerCase() === "comments") return "";
   return truncate(stripped, 200);
 }
 
@@ -166,6 +169,10 @@ export function parseRssFeed(
 
     // Skip items without required fields
     if (!title || !link || !pubDate) continue;
+
+    // Skip HN comment-only items (e.g., "Comments" links)
+    const cleanTitle = stripHtml(title).trim();
+    if (cleanTitle.toLowerCase() === "comments" || cleanTitle.length < 5) continue;
 
     const summary = extractSummary(entry as Record<string, unknown>);
 

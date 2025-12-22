@@ -29,6 +29,7 @@ vi.mock("@/modules/news", () => ({
   NewsItemComponent: ({ item }: { item: { title: string } }) => (
     <div data-testid="news-item">{item.title}</div>
   ),
+  RefreshButton: () => <button>Refresh</button>,
 }));
 
 describe("News Page", () => {

@@ -1,9 +1,10 @@
 import { Badge } from "@/components/ui/badge";
+import { getSourceBrand } from "../lib/source-branding";
 import type { NewsItem as NewsItemType } from "../types";
 
 interface NewsItemProps {
-  item: NewsItemType;
-  compact?: boolean;
+  readonly item: NewsItemType;
+  readonly compact?: boolean;
 }
 
 const categoryColors: Record<NewsItemType["category"], string> = {
@@ -31,6 +32,22 @@ function formatRelativeTime(date: Date): string {
   return date.toLocaleDateString();
 }
 
+interface SourceBadgeProps {
+  readonly source: string;
+}
+
+function SourceBadge({ source }: SourceBadgeProps) {
+  const brand = getSourceBrand(source);
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${brand.bgColor} ${brand.textColor} ${brand.borderColor}`}
+    >
+      {brand.icon}
+      {source}
+    </span>
+  );
+}
+
 export function NewsItemComponent({ item, compact = false }: NewsItemProps) {
   if (compact) {
     return (
@@ -45,9 +62,8 @@ export function NewsItemComponent({ item, compact = false }: NewsItemProps) {
             <p className="text-sm font-medium leading-tight line-clamp-2">
               {item.title}
             </p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-muted-foreground">{item.source}</span>
-              <span className="text-xs text-muted-foreground">•</span>
+            <div className="flex items-center gap-2 mt-1.5">
+              <SourceBadge source={item.source} />
               <span className="text-xs text-muted-foreground">
                 {formatRelativeTime(item.publishedAt)}
               </span>
@@ -66,17 +82,18 @@ export function NewsItemComponent({ item, compact = false }: NewsItemProps) {
       href={item.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+      className="block py-2 px-3 border rounded-lg hover:bg-accent/50 transition-colors"
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold leading-tight">{item.title}</h3>
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-            {item.summary}
-          </p>
-          <div className="flex items-center gap-2 mt-3">
-            <span className="text-xs text-muted-foreground">{item.source}</span>
-            <span className="text-xs text-muted-foreground">•</span>
+          <h3 className="text-sm font-semibold leading-tight">{item.title}</h3>
+          {item.summary && (
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+              {item.summary}
+            </p>
+          )}
+          <div className="flex items-center gap-2 mt-1.5">
+            <SourceBadge source={item.source} />
             <span className="text-xs text-muted-foreground">
               {formatRelativeTime(item.publishedAt)}
             </span>

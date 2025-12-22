@@ -36,6 +36,14 @@ describe("NewsItemComponent", () => {
       expect(link.getAttribute("target")).toBe("_blank");
       expect(link.getAttribute("rel")).toBe("noopener noreferrer");
     });
+
+    it("renders source badge with icon", () => {
+      render(<NewsItemComponent item={mockItem} compact />);
+
+      const sourceBadge = screen.getByText("Test Source").closest("span");
+      expect(sourceBadge).toBeDefined();
+      expect(sourceBadge?.querySelector("svg")).toBeDefined();
+    });
   });
 
   describe("full mode", () => {
@@ -52,6 +60,14 @@ describe("NewsItemComponent", () => {
 
       expect(screen.getByText("dev")).toBeDefined();
     });
+
+    it("renders source badge with icon", () => {
+      render(<NewsItemComponent item={mockItem} />);
+
+      const sourceBadge = screen.getByText("Test Source").closest("span");
+      expect(sourceBadge).toBeDefined();
+      expect(sourceBadge?.querySelector("svg")).toBeDefined();
+    });
   });
 
   describe("category colors", () => {
@@ -66,6 +82,28 @@ describe("NewsItemComponent", () => {
 
       const badge = screen.getByText(category);
       expect(badge.className).toContain(expectedClass);
+    });
+  });
+
+  describe("source branding", () => {
+    it.each([
+      ["Hacker News", "text-orange-600"],
+      ["AP", "text-red-600"],
+      ["BBC Tech", "text-rose-600"],
+      ["VS Code", "text-cyan-600"],
+    ])("renders %s with branded colors", (source, expectedClass) => {
+      const item = { ...mockItem, source };
+      render(<NewsItemComponent item={item} />);
+
+      const sourceBadge = screen.getByText(source).closest("span");
+      expect(sourceBadge?.className).toContain(expectedClass);
+    });
+
+    it("renders unknown source with default styling", () => {
+      render(<NewsItemComponent item={mockItem} />);
+
+      const sourceBadge = screen.getByText("Test Source").closest("span");
+      expect(sourceBadge?.className).toContain("text-gray-600");
     });
   });
 

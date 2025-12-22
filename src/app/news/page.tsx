@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { fetchNews, NewsItemComponent } from "@/modules/news";
-import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
+import { fetchNews, NewsItemComponent, RefreshButton } from "@/modules/news";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default async function NewsPage() {
@@ -24,10 +24,7 @@ export default async function NewsPage() {
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
-        </Button>
+        <RefreshButton />
       </div>
 
       {errors.length > 0 && (
@@ -40,7 +37,7 @@ export default async function NewsPage() {
         </Alert>
       )}
 
-      <div className="grid gap-4">
+      <div className="grid gap-2">
         {items.map((item) => (
           <NewsItemComponent key={item.id} item={item} />
         ))}
