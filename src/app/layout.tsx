@@ -6,16 +6,21 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Lato, Nunito, Open_Sans, Roboto } from "next/font/google";
 import "./globals.css";
 
-async function getProfileData(userId: string): Promise<{ displayName: string | null; sidebarWidth: number | null }> {
+async function getProfileData(userId: string): Promise<{
+  displayName: string | null;
+  sidebarWidth: number | null;
+  isAdmin: boolean;
+}> {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, sidebar_width")
+    .select("display_name, sidebar_width, role")
     .eq("id", userId)
     .single();
   return {
     displayName: profile?.display_name ?? null,
     sidebarWidth: profile?.sidebar_width ?? null,
+    isAdmin: profile?.role === "admin",
   };
 }
 
@@ -130,6 +135,7 @@ export default async function RootLayout({
               userEmail={user.email}
               displayName={profileData?.displayName ?? undefined}
               serverSidebarWidth={profileData?.sidebarWidth}
+              isAdmin={profileData?.isAdmin}
             />
             <div className="flex flex-1 flex-col overflow-hidden">
               <Header />

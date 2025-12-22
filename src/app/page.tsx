@@ -1,3 +1,4 @@
+import { ExpendituresWidget } from "@/modules/expenditures";
 import { PRWidget } from "@/modules/github-prs";
 import { NewsWidget } from "@/modules/news";
 
@@ -14,6 +15,7 @@ export default function Home() {
       <div className="grid gap-8 md:grid-cols-2">
         <PRWidget />
         <NewsWidget />
+        <ExpendituresWidget />
       </div>
     </div>
   );

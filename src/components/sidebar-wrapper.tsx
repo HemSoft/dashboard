@@ -8,10 +8,12 @@ export function SidebarWrapper({
   userEmail,
   displayName,
   serverSidebarWidth,
+  isAdmin,
 }: {
   userEmail?: string;
   displayName?: string;
   serverSidebarWidth?: number | null;
+  isAdmin?: boolean;
 }) {
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -30,6 +32,7 @@ export function SidebarWrapper({
       userEmail={userEmail}
       displayName={displayName}
       serverSidebarWidth={serverSidebarWidth}
+      isAdmin={isAdmin}
       onWidthChange={handleWidthChange}
     />
   );

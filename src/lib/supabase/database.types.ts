@@ -32,6 +32,45 @@ export type Database = {
         }
         Relationships: []
       }
+      expenditure_sources: {
+        Row: {
+          base_cost: number
+          billing_cycle: string
+          billing_day_of_month: number
+          consumption_cost: number
+          created_at: string
+          details_url: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_cost?: number
+          billing_cycle?: string
+          billing_day_of_month?: number
+          consumption_cost?: number
+          created_at?: string
+          details_url?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_cost?: number
+          billing_cycle?: string
+          billing_day_of_month?: number
+          consumption_cost?: number
+          created_at?: string
+          details_url?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       github_accounts: {
         Row: {
           access_token: string

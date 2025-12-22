@@ -77,4 +77,5 @@ export function useSidebarWidthInit(serverWidth?: number | null) {
   }, [serverWidth]);
 }
 
-export { DEFAULT_WIDTH, MIN_WIDTH, MAX_WIDTH };
+export { DEFAULT_WIDTH, MAX_WIDTH, MIN_WIDTH };
+
