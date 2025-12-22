@@ -1,3 +1,21 @@
+# Dashboard
+
+<p align="left">
+  <a href="https://github.com/HemSoft/dashboard/deployments"><img src="https://img.shields.io/github/deployments/HemSoft/dashboard/production?label=vercel&logo=vercel&logoColor=white" alt="Vercel Deployment" /></a>
+  <a href="https://github.com/HemSoft/dashboard/blob/main/LICENSE"><img src="https://img.shields.io/github/license/HemSoft/dashboard" alt="License" /></a>
+</p>
+
+### Built With
+
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
