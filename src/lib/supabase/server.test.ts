@@ -12,14 +12,23 @@ vi.mock("next/headers", () => ({
   cookies: vi.fn(() => Promise.resolve(mockCookieStore)),
 }));
 
-const mockCreateServerClient = vi.fn(() => ({
+const mockClient = {
   from: vi.fn().mockReturnThis(),
   select: vi.fn().mockReturnThis(),
   auth: {
     getUser: vi.fn(),
     getSession: vi.fn(),
   },
-}));
+};
+
+const mockCreateServerClient = vi.fn(
+  (url: string, key: string, options: unknown) => {
+    void url;
+    void key;
+    void options;
+    return mockClient;
+  }
+);
 
 vi.mock("@supabase/ssr", () => ({
   createServerClient: (url: string, key: string, options: unknown) =>
@@ -60,7 +69,8 @@ describe("createClient (server)", () => {
     await createClient();
 
     // Get the cookie options that were passed
-    const cookieOptions = mockCreateServerClient.mock.calls[0][2].cookies;
+    const call = mockCreateServerClient.mock.calls[0] as unknown[];
+    const cookieOptions = (call[2] as { cookies: { getAll: () => unknown } }).cookies;
     const result = cookieOptions.getAll();
 
     expect(result).toEqual([{ name: "test-cookie", value: "test-value" }]);
@@ -70,7 +80,8 @@ describe("createClient (server)", () => {
     const { createClient } = await import("./server");
     await createClient();
 
-    const cookieOptions = mockCreateServerClient.mock.calls[0][2].cookies;
+    const call = mockCreateServerClient.mock.calls[0] as unknown[];
+    const cookieOptions = (call[2] as { cookies: { setAll: (cookies: unknown[]) => void } }).cookies;
     cookieOptions.setAll([
       { name: "cookie1", value: "value1", options: { httpOnly: true } },
     ]);
@@ -88,7 +99,8 @@ describe("createClient (server)", () => {
     const { createClient } = await import("./server");
     await createClient();
 
-    const cookieOptions = mockCreateServerClient.mock.calls[0][2].cookies;
+    const call = mockCreateServerClient.mock.calls[0] as unknown[];
+    const cookieOptions = (call[2] as { cookies: { setAll: (cookies: unknown[]) => void } }).cookies;
 
     // Should not throw
     expect(() => {

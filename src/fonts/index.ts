@@ -82,7 +82,7 @@ export function applyFontToDocument(font: FontName): void {
 export function getCurrentFont(): FontName {
   if (typeof document === "undefined") return DEFAULT_FONT;
   const font = document.documentElement.getAttribute("data-font");
-  return isValidFont(font ?? "") ? font : DEFAULT_FONT;
+  return isValidFont(font ?? "") ? (font as FontName) : DEFAULT_FONT;
 }
 
 /**
@@ -91,7 +91,7 @@ export function getCurrentFont(): FontName {
 export function getStoredFontName(): FontName {
   if (typeof localStorage === "undefined") return DEFAULT_FONT;
   const stored = localStorage.getItem("dashboard-font");
-  return isValidFont(stored ?? "") ? stored : DEFAULT_FONT;
+  return isValidFont(stored ?? "") ? (stored as FontName) : DEFAULT_FONT;
 }
 
 /**

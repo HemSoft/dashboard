@@ -118,7 +118,7 @@ export default async function Home() {
                     </TableCell>
                     <TableCell className="font-medium">{record.name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {new Date(record.created_at).toLocaleDateString()}
+                      {record.created_at ? new Date(record.created_at).toLocaleDateString() : '-'}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>

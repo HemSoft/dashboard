@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Clear global mocks and create fresh ones for this test
 vi.unmock("@/lib/supabase/client");
 
-const mockCreateBrowserClient = vi.fn(() => ({
+const mockClient = {
   from: vi.fn().mockReturnThis(),
   select: vi.fn().mockReturnThis(),
   auth: {
@@ -12,7 +12,13 @@ const mockCreateBrowserClient = vi.fn(() => ({
     onAuthStateChange: vi.fn(),
     signOut: vi.fn(),
   },
-}));
+};
+
+const mockCreateBrowserClient = vi.fn((url: string, key: string) => {
+  void url;
+  void key;
+  return mockClient;
+});
 
 vi.mock("@supabase/ssr", () => ({
   createBrowserClient: (url: string, key: string) => mockCreateBrowserClient(url, key),

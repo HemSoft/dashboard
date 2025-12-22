@@ -60,7 +60,7 @@ export function applyThemeToDocument(theme: ThemeName): void {
 export function getCurrentTheme(): ThemeName {
   if (typeof document === "undefined") return "default";
   const theme = document.documentElement.getAttribute("data-theme");
-  return isValidTheme(theme ?? "") ? theme : "default";
+  return isValidTheme(theme ?? "") ? (theme as ThemeName) : "default";
 }
 
 /**
@@ -69,7 +69,7 @@ export function getCurrentTheme(): ThemeName {
 export function getStoredThemeName(): ThemeName {
   if (typeof localStorage === "undefined") return "default";
   const stored = localStorage.getItem("theme-name");
-  return isValidTheme(stored ?? "") ? stored : "default";
+  return isValidTheme(stored ?? "") ? (stored as ThemeName) : "default";
 }
 
 /**
