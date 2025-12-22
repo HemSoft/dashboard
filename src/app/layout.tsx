@@ -119,7 +119,7 @@ export default async function RootLayout({
   const profileData = user ? await getProfileData(user.id) : null;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

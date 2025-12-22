@@ -1,8 +1,20 @@
+import { LandingPage } from "@/components/landing";
+import { createClient } from "@/lib/supabase/server";
 import { ExpendituresWidget } from "@/modules/expenditures";
 import { PRWidget } from "@/modules/github-prs";
 import { NewsWidget } from "@/modules/news";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Show landing page for unauthenticated users
+  if (!user) {
+    return <LandingPage />;
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div>

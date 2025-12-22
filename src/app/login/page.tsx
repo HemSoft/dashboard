@@ -1,3 +1,4 @@
+import { AuthLayout } from "@/components/landing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,10 +13,10 @@ export default async function LoginPage({
   const { error, message } = await searchParams;
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
+    <AuthLayout>
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>
             Enter your email and password to access your dashboard.
           </CardDescription>
@@ -52,6 +53,6 @@ export default async function LoginPage({
           </CardFooter>
         </form>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

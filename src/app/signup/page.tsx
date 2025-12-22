@@ -1,3 +1,4 @@
+import { AuthLayout } from "@/components/landing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,8 @@ export default async function SignUpPage({
   const { error } = await searchParams;
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
+    <AuthLayout>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
@@ -47,6 +48,6 @@ export default async function SignUpPage({
           </CardFooter>
         </form>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

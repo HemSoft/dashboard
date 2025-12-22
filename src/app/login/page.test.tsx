@@ -7,6 +7,15 @@ vi.mock("../auth/actions", () => ({
   signIn: vi.fn(),
 }));
 
+// Mock framer-motion to avoid animation issues in tests
+vi.mock("framer-motion", () => ({
+  motion: {
+    div: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+      <div {...props}>{children}</div>
+    ),
+  },
+}));
+
 describe("LoginPage", () => {
   it("renders login form correctly", async () => {
     const Page = await LoginPage({
@@ -15,7 +24,7 @@ describe("LoginPage", () => {
 
     render(Page);
 
-    expect(screen.getByText("Login")).toBeDefined();
+    expect(screen.getByText("Welcome back")).toBeDefined();
     expect(
       screen.getByText("Enter your email and password to access your dashboard.")
     ).toBeDefined();
