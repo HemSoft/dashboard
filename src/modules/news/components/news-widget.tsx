@@ -6,7 +6,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Newspaper } from "lucide-react";
+import { AlertTriangle, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { fetchNews } from "../actions";
 import { NewsItemComponent } from "./news-item";
@@ -16,7 +16,7 @@ interface NewsWidgetProps {
 }
 
 export async function NewsWidget({ maxItems = 3 }: NewsWidgetProps) {
-  const items = await fetchNews();
+  const { items, errors } = await fetchNews();
   const displayItems = items.slice(0, maxItems);
 
   return (
@@ -34,6 +34,12 @@ export async function NewsWidget({ maxItems = 3 }: NewsWidgetProps) {
         </Button>
       </CardHeader>
       <CardContent>
+        {errors.length > 0 && (
+          <div className="flex items-center gap-2 text-sm text-destructive mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <span>{errors.length} feed(s) failed</span>
+          </div>
+        )}
         <div className="divide-y">
           {displayItems.map((item) => (
             <NewsItemComponent key={item.id} item={item} compact />

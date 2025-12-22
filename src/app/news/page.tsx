@@ -1,10 +1,11 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { fetchNews, NewsItemComponent } from "@/modules/news";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 export default async function NewsPage() {
-  const items = await fetchNews();
+  const { items, errors } = await fetchNews();
 
   return (
     <div className="flex flex-col gap-8">
@@ -28,6 +29,16 @@ export default async function NewsPage() {
           Refresh
         </Button>
       </div>
+
+      {errors.length > 0 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Some feeds failed to load</AlertTitle>
+          <AlertDescription>
+            {errors.map((e) => e.source).join(", ")}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-4">
         {items.map((item) => (

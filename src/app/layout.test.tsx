@@ -6,6 +6,11 @@ import RootLayout from './layout'
 vi.mock('next/font/google', () => ({
   Geist: () => ({ variable: 'geist-sans' }),
   Geist_Mono: () => ({ variable: 'geist-mono' }),
+  Inter: () => ({ variable: 'inter' }),
+  Roboto: () => ({ variable: 'roboto' }),
+  Nunito: () => ({ variable: 'nunito' }),
+  Open_Sans: () => ({ variable: 'open-sans' }),
+  Lato: () => ({ variable: 'lato' }),
 }))
 
 const mockFrom = vi.fn()

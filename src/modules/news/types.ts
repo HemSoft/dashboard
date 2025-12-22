@@ -1,3 +1,5 @@
+export type NewsCategory = "tech" | "dev" | "ai" | "general";
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -5,7 +7,23 @@ export interface NewsItem {
   source: string;
   url: string;
   publishedAt: Date;
-  category: "tech" | "dev" | "ai" | "general";
+  category: NewsCategory;
+}
+
+export interface RssSource {
+  name: string;
+  url: string;
+  category: NewsCategory;
+}
+
+export interface FeedError {
+  source: string;
+  message: string;
+}
+
+export interface FetchNewsResult {
+  items: NewsItem[];
+  errors: FeedError[];
 }
 
 export interface NewsWidgetProps {

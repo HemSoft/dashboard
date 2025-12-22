@@ -1,3 +1,4 @@
+import { FontPicker } from "@/components/font-picker";
 import { ThemePicker } from "@/components/theme-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -100,6 +101,16 @@ export default async function AccountPage({
               <ThemePicker defaultValue={profile?.theme} />
               <p className="text-xs text-muted-foreground">
                 Choose your preferred color palette. Works with both light and dark modes.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="font" className="text-sm font-medium">
+                Font
+              </label>
+              <FontPicker defaultValue={profile?.font} />
+              <p className="text-xs text-muted-foreground">
+                Choose your preferred typeface for the interface.
               </p>
             </div>
 

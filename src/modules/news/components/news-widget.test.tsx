@@ -3,44 +3,47 @@ import { describe, expect, it, vi } from "vitest";
 import { NewsWidget } from "./news-widget";
 
 vi.mock("../actions", () => ({
-  fetchNews: vi.fn().mockResolvedValue([
-    {
-      id: "1",
-      title: "First News Item",
-      summary: "Summary 1",
-      source: "Source 1",
-      url: "https://example.com/1",
-      publishedAt: new Date("2025-12-20T10:00:00Z"),
-      category: "dev",
-    },
-    {
-      id: "2",
-      title: "Second News Item",
-      summary: "Summary 2",
-      source: "Source 2",
-      url: "https://example.com/2",
-      publishedAt: new Date("2025-12-19T10:00:00Z"),
-      category: "ai",
-    },
-    {
-      id: "3",
-      title: "Third News Item",
-      summary: "Summary 3",
-      source: "Source 3",
-      url: "https://example.com/3",
-      publishedAt: new Date("2025-12-18T10:00:00Z"),
-      category: "tech",
-    },
-    {
-      id: "4",
-      title: "Fourth News Item",
-      summary: "Summary 4",
-      source: "Source 4",
-      url: "https://example.com/4",
-      publishedAt: new Date("2025-12-17T10:00:00Z"),
-      category: "general",
-    },
-  ]),
+  fetchNews: vi.fn().mockResolvedValue({
+    items: [
+      {
+        id: "1",
+        title: "First News Item",
+        summary: "Summary 1",
+        source: "Source 1",
+        url: "https://example.com/1",
+        publishedAt: new Date("2025-12-20T10:00:00Z"),
+        category: "dev",
+      },
+      {
+        id: "2",
+        title: "Second News Item",
+        summary: "Summary 2",
+        source: "Source 2",
+        url: "https://example.com/2",
+        publishedAt: new Date("2025-12-19T10:00:00Z"),
+        category: "ai",
+      },
+      {
+        id: "3",
+        title: "Third News Item",
+        summary: "Summary 3",
+        source: "Source 3",
+        url: "https://example.com/3",
+        publishedAt: new Date("2025-12-18T10:00:00Z"),
+        category: "tech",
+      },
+      {
+        id: "4",
+        title: "Fourth News Item",
+        summary: "Summary 4",
+        source: "Source 4",
+        url: "https://example.com/4",
+        publishedAt: new Date("2025-12-17T10:00:00Z"),
+        category: "general",
+      },
+    ],
+    errors: [],
+  }),
 }));
 
 describe("NewsWidget", () => {
@@ -83,11 +86,39 @@ describe("NewsWidget", () => {
 describe("NewsWidget empty state", () => {
   it("shows empty message when no items", async () => {
     const { fetchNews } = await import("../actions");
-    vi.mocked(fetchNews).mockResolvedValueOnce([]);
+    vi.mocked(fetchNews).mockResolvedValueOnce({ items: [], errors: [] });
 
     const Widget = await NewsWidget({});
     render(Widget);
 
     expect(screen.getByText("No news items available")).toBeDefined();
+  });
+});
+
+describe("NewsWidget error state", () => {
+  it("shows error count when feeds fail", async () => {
+    const { fetchNews } = await import("../actions");
+    vi.mocked(fetchNews).mockResolvedValueOnce({
+      items: [
+        {
+          id: "1",
+          title: "Working Item",
+          summary: "Summary",
+          source: "Source",
+          url: "https://example.com/1",
+          publishedAt: new Date(),
+          category: "dev",
+        },
+      ],
+      errors: [
+        { source: "BBC Tech", message: "HTTP 500" },
+        { source: "NPR News", message: "Network error" },
+      ],
+    });
+
+    const Widget = await NewsWidget({});
+    render(Widget);
+
+    expect(screen.getByText("2 feed(s) failed")).toBeDefined();
   });
 });

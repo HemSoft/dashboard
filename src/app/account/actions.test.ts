@@ -94,6 +94,7 @@ describe("account actions", () => {
       const formData = new FormData();
       formData.set("displayName", "Test User");
       formData.set("theme", "default");
+      formData.set("font", "geist");
 
       await expect(updateProfile(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/account?success=true"
@@ -109,6 +110,7 @@ describe("account actions", () => {
       const formData = new FormData();
       formData.set("displayName", "Test User");
       formData.set("theme", "default");
+      formData.set("font", "geist");
 
       await expect(updateProfile(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/account?error=Database%20error"
@@ -122,6 +124,7 @@ describe("account actions", () => {
       const formData = new FormData();
       formData.set("displayName", "");
       formData.set("theme", "default");
+      formData.set("font", "geist");
 
       await expect(updateProfile(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/account?success=true"
@@ -135,6 +138,21 @@ describe("account actions", () => {
       const formData = new FormData();
       formData.set("displayName", "Test User");
       formData.set("theme", "");
+      formData.set("font", "geist");
+
+      await expect(updateProfile(formData)).rejects.toThrow(
+        "NEXT_REDIRECT:/account?success=true"
+      );
+    });
+
+    it("defaults font to 'geist' when not provided", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "user-123" } } });
+      mockEq.mockResolvedValue({ error: null });
+
+      const formData = new FormData();
+      formData.set("displayName", "Test User");
+      formData.set("theme", "default");
+      formData.set("font", "");
 
       await expect(updateProfile(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/account?success=true"

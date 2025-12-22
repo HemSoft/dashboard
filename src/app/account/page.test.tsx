@@ -42,6 +42,7 @@ describe("AccountPage", () => {
       role: "user",
       display_name: "Test User",
       theme: "default",
+      font: "geist",
       updated_at: "2024-01-01T00:00:00Z",
     });
   });
@@ -58,6 +59,7 @@ describe("AccountPage", () => {
     expect(screen.getByLabelText("Email")).toBeDefined();
     expect(screen.getByLabelText("Display Name")).toBeDefined();
     expect(screen.getByLabelText("Theme")).toBeDefined();
+    expect(screen.getByLabelText("Font")).toBeDefined();
     expect(screen.getByRole("button", { name: "Save Changes" })).toBeDefined();
   });
 
@@ -159,6 +161,7 @@ describe("AccountPage", () => {
       role: "user",
       display_name: null,
       theme: "default",
+      font: "geist",
       updated_at: "2024-01-01T00:00:00Z",
     });
 
@@ -170,5 +173,29 @@ describe("AccountPage", () => {
 
     const displayNameInput = screen.getByLabelText("Display Name") as HTMLInputElement;
     expect(displayNameInput.defaultValue).toBe("");
+  });
+
+  it("shows default font selected", async () => {
+    const Page = await AccountPage({
+      searchParams: Promise.resolve({}),
+    });
+
+    render(Page);
+
+    const fontSelect = screen.getByLabelText("Font") as HTMLSelectElement;
+    expect(fontSelect.value).toBe("geist");
+  });
+
+  it("handles null profile gracefully with default font", async () => {
+    mockGetProfile.mockResolvedValue(null);
+
+    const Page = await AccountPage({
+      searchParams: Promise.resolve({}),
+    });
+
+    render(Page);
+
+    const fontSelect = screen.getByLabelText("Font") as HTMLSelectElement;
+    expect(fontSelect.value).toBe("geist");
   });
 });

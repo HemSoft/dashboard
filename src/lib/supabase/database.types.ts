@@ -36,6 +36,7 @@ export type Database = {
         Row: {
           display_name: string | null
           email: string | null
+          font: string | null
           id: string
           role: string | null
           theme: string | null
@@ -44,6 +45,7 @@ export type Database = {
         Insert: {
           display_name?: string | null
           email?: string | null
+          font?: string | null
           id: string
           role?: string | null
           theme?: string | null
@@ -52,6 +54,7 @@ export type Database = {
         Update: {
           display_name?: string | null
           email?: string | null
+          font?: string | null
           id?: string
           role?: string | null
           theme?: string | null
@@ -64,7 +67,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

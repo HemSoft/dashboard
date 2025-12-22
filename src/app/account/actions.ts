@@ -29,6 +29,7 @@ export async function getProfile(): Promise<Profile | null> {
 export async function updateProfile(formData: FormData) {
   const displayName = formData.get("displayName") as string;
   const theme = formData.get("theme") as string;
+  const font = formData.get("font") as string;
 
   const supabase = await createClient();
   const {
@@ -44,6 +45,7 @@ export async function updateProfile(formData: FormData) {
     .update({
       display_name: displayName || null,
       theme: theme || "default",
+      font: font || "geist",
       updated_at: new Date().toISOString(),
     })
     .eq("id", user.id);

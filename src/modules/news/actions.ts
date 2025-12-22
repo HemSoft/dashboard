@@ -1,8 +1,8 @@
 "use server";
 
-import { getNewsItems } from "./data";
-import type { NewsItem } from "./types";
+import { fetchAllNews } from "./lib/fetcher";
+import type { FetchNewsResult } from "./types";
 
-export async function fetchNews(): Promise<NewsItem[]> {
-  return getNewsItems();
+export async function fetchNews(): Promise<FetchNewsResult> {
+  return fetchAllNews();
 }
