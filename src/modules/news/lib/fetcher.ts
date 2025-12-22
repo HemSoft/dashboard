@@ -34,7 +34,11 @@ async function fetchSource(source: RssSource): Promise<FetchSourceResult> {
 
     const xml = await response.text();
     const items = parseRssFeed(xml, source);
-    return { items: items.slice(0, MAX_ITEMS_PER_SOURCE) };
+    // Sort by date before slicing to ensure we keep the most recent items
+    const sorted = items.sort(
+      (a, b) => b.publishedAt.getTime() - a.publishedAt.getTime()
+    );
+    return { items: sorted.slice(0, MAX_ITEMS_PER_SOURCE) };
   } catch (err) {
     return {
       items: [],

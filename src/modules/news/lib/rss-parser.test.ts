@@ -29,6 +29,21 @@ describe("RSS Parser", () => {
       const id = generateId("https://example.com");
       expect(id).toMatch(/^[a-z0-9]+$/);
     });
+
+    it("generates different IDs when source differs", () => {
+      const url = "https://example.com/article/1";
+      const id1 = generateId(url, "Source A");
+      const id2 = generateId(url, "Source B");
+      expect(id1).not.toBe(id2);
+    });
+
+    it("generates consistent ID with same source", () => {
+      const url = "https://example.com/article/1";
+      const source = "Test Source";
+      const id1 = generateId(url, source);
+      const id2 = generateId(url, source);
+      expect(id1).toBe(id2);
+    });
   });
 
   describe("stripHtml", () => {

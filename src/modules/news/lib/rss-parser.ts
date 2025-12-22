@@ -8,15 +8,21 @@ const parser = new XMLParser({
 
 /**
  * Generate a stable ID from a URL using a simple hash.
+ * Combines source and URL to reduce collision probability.
  */
-export function generateId(url: string): string {
+export function generateId(url: string, source?: string): string {
+  const input = source ? `${source}:${url}` : url;
   let hash = 0;
-  for (let i = 0; i < url.length; i++) {
-    const char = url.charCodeAt(i);
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
-  return Math.abs(hash).toString(36);
+  // Use a longer base36 representation to reduce collisions
+  const hashStr = Math.abs(hash).toString(36);
+  // Add URL length as additional entropy
+  const lengthStr = url.length.toString(36);
+  return `${hashStr}${lengthStr}`;
 }
 
 /**
@@ -161,7 +167,7 @@ export function parseRssFeed(
     const summary = extractSummary(entry as Record<string, unknown>);
 
     items.push({
-      id: generateId(link),
+      id: generateId(link, source.name),
       title: stripHtml(title),
       summary,
       source: source.name,
