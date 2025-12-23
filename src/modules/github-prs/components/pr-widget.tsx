@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -9,10 +10,26 @@ import {
 import { AlertTriangle, GitPullRequest } from "lucide-react";
 import Link from "next/link";
 import { getPullRequests } from "../actions";
+import { GitHubAccountWithPRs } from "../types";
 import { PRTree } from "./pr-tree";
+
+function countTotalPRs(accounts: GitHubAccountWithPRs[]): number {
+  return accounts.reduce((total, account) => {
+    // Count unique PRs across all categories (PRs can appear in multiple categories)
+    const uniquePRIds = new Set<number>();
+    for (const category of account.categories) {
+      for (const pr of category.items) {
+        uniquePRIds.add(pr.id);
+      }
+    }
+    return total + uniquePRIds.size;
+  }, 0);
+}
 
 export async function PRWidget() {
   const { accounts, errors } = await getPullRequests();
+
+  const totalPRs = countTotalPRs(accounts);
 
   return (
     <Card>
@@ -20,7 +37,14 @@ export async function PRWidget() {
         <div className="flex items-start gap-2">
           <GitPullRequest className="h-4 w-4 text-muted-foreground mt-1" />
           <div>
-            <CardTitle>Pull Requests</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle>Pull Requests</CardTitle>
+              {totalPRs > 0 && (
+                <Badge variant="secondary" className="text-xs tabular-nums">
+                  {totalPRs}
+                </Badge>
+              )}
+            </div>
             <CardDescription className="text-xs">GitHub PRs across your accounts</CardDescription>
           </div>
         </div>
