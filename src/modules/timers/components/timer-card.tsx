@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Pause, Play, RotateCcw, Timer as TimerIcon, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { deleteTimer, pauseTimer, resetTimer, startTimer } from "../actions";
 import type { Timer } from "../types";
 import { formatTime, getProgress } from "../types";
@@ -31,6 +31,19 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
     setLocalRemaining(initialTimer.remainingSeconds);
   }, [initialTimer]);
 
+  const handleComplete = useCallback(async () => {
+    // Timer completed, trigger alarm if enabled
+    if (timer.enableAlarm) {
+      // Web Audio API alarm will be triggered by TimerAlertProvider
+      window.dispatchEvent(
+        new CustomEvent("timer-complete", {
+          detail: { timer },
+        })
+      );
+    }
+    onUpdate?.();
+  }, [timer, onUpdate]);
+
   // Client-side countdown for running timers
   useEffect(() => {
     if (timer.state !== "running") return;
@@ -47,20 +60,7 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timer.state]);
-
-  const handleComplete = async () => {
-    // Timer completed, trigger alarm if enabled
-    if (timer.enableAlarm) {
-      // Web Audio API alarm will be triggered by TimerAlertProvider
-      window.dispatchEvent(
-        new CustomEvent("timer-complete", {
-          detail: { timer },
-        })
-      );
-    }
-    onUpdate?.();
-  };
+  }, [timer.state, handleComplete]);
 
   const handleStart = async () => {
     await startTimer(timer.id);

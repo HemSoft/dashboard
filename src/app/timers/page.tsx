@@ -2,7 +2,7 @@
 
 import { Timer as TimerIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CreateTimerDialog } from "@/modules/timers/components/create-timer-dialog";
 import { TimerAlertProvider } from "@/modules/timers/components/timer-alert-provider";
 import { TimerCard } from "@/modules/timers/components/timer-card";
@@ -15,7 +15,7 @@ export default function TimersPage() {
   const [error, setError] = useState<string | undefined>();
   const router = useRouter();
 
-  const loadTimers = async () => {
+  const loadTimers = useCallback(async () => {
     const result = await getTimers();
     if (result.error) {
       setError(result.error);
@@ -23,11 +23,12 @@ export default function TimersPage() {
       setTimers(result.timers);
     }
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTimers();
-  }, []);
+  }, [loadTimers]);
 
   const handleUpdate = () => {
     router.refresh();

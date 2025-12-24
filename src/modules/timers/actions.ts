@@ -25,7 +25,7 @@ export async function getTimers(): Promise<FetchTimersResult> {
   }
 
   const { data, error } = await supabase
-    .from("timers")
+    .from("timers" as never)
     .select("*")
     .eq("user_id", user.id)
     .order("display_order", { ascending: true });
@@ -35,7 +35,22 @@ export async function getTimers(): Promise<FetchTimersResult> {
     return { timers: [], error: error.message };
   }
 
-  const timers: Timer[] = (data ?? []).map((row) => {
+  const timers: Timer[] = (data ?? []).map((row: {
+    id: string;
+    user_id: string;
+    name: string;
+    duration_seconds: number;
+    remaining_seconds: number;
+    state: string;
+    end_time: string | null;
+    enable_completion_color: boolean;
+    completion_color: string;
+    enable_alarm: boolean;
+    alarm_sound: string;
+    display_order: number;
+    created_at: string;
+    updated_at: string;
+  }) => {
     const timer: Timer = {
       id: row.id,
       userId: row.user_id,
@@ -76,16 +91,16 @@ export async function createTimer(
 
   // Get the highest display_order to add new timer at the end
   const { data: existingTimers } = await supabase
-    .from("timers")
+    .from("timers" as never)
     .select("display_order")
     .eq("user_id", user.id)
     .order("display_order", { ascending: false })
     .limit(1);
 
-  const maxOrder = existingTimers?.[0]?.display_order ?? -1;
+  const maxOrder = (existingTimers?.[0] as { display_order: number } | undefined)?.display_order ?? -1;
 
   const { data, error } = await supabase
-    .from("timers")
+    .from("timers" as never)
     .insert({
       user_id: user.id,
       name: input.name,
@@ -97,7 +112,7 @@ export async function createTimer(
       enable_alarm: input.enableAlarm ?? true,
       alarm_sound: input.alarmSound ?? "default",
       display_order: maxOrder + 1,
-    })
+    } as never)
     .select("id")
     .single();
 
@@ -108,7 +123,7 @@ export async function createTimer(
 
   revalidatePath("/timers");
   revalidatePath("/");
-  return { success: true, id: data.id };
+  return { success: true, id: (data as { id: string }).id };
 }
 
 /**
@@ -148,8 +163,8 @@ export async function updateTimer(
     updateData.display_order = input.displayOrder;
 
   const { error } = await supabase
-    .from("timers")
-    .update(updateData)
+    .from("timers" as never)
+    .update(updateData as never)
     .eq("id", id)
     .eq("user_id", user.id);
 
@@ -177,7 +192,7 @@ export async function deleteTimer(id: string): Promise<UpdateResult> {
   }
 
   const { error } = await supabase
-    .from("timers")
+    .from("timers" as never)
     .delete()
     .eq("id", id)
     .eq("user_id", user.id);
@@ -207,7 +222,7 @@ export async function startTimer(id: string): Promise<UpdateResult> {
 
   // Get current timer to calculate end_time
   const { data: timer, error: fetchError } = await supabase
-    .from("timers")
+    .from("timers" as never)
     .select("remaining_seconds")
     .eq("id", id)
     .eq("user_id", user.id)
@@ -217,7 +232,8 @@ export async function startTimer(id: string): Promise<UpdateResult> {
     return { success: false, error: "Timer not found" };
   }
 
-  const endTime = new Date(Date.now() + timer.remaining_seconds * 1000);
+  const remainingSeconds = (timer as { remaining_seconds: number }).remaining_seconds;
+  const endTime = new Date(Date.now() + remainingSeconds * 1000);
 
   return updateTimer(id, {
     state: "running",
@@ -254,7 +270,7 @@ export async function resetTimer(id: string): Promise<UpdateResult> {
 
   // Get the original duration
   const { data: timer, error: fetchError } = await supabase
-    .from("timers")
+    .from("timers" as never)
     .select("duration_seconds")
     .eq("id", id)
     .eq("user_id", user.id)
@@ -264,9 +280,11 @@ export async function resetTimer(id: string): Promise<UpdateResult> {
     return { success: false, error: "Timer not found" };
   }
 
+  const durationSeconds = (timer as { duration_seconds: number }).duration_seconds;
+
   return updateTimer(id, {
     state: "stopped",
-    remainingSeconds: timer.duration_seconds,
+    remainingSeconds: durationSeconds,
     endTime: null,
   });
 }

@@ -81,6 +81,7 @@ const mockWidgetComponents: Record<WidgetId, ReactNode> = {
   expenditures: (
     <div data-testid="expenditures-widget">Expenditures Widget</div>
   ),
+  timers: <div data-testid="timers-widget">Timers Widget</div>,
 };
 
 describe("DashboardGrid", () => {
@@ -149,6 +150,7 @@ describe("DashboardGrid", () => {
       "pull-requests": <div data-testid="pr-widget">PR Widget</div>,
       news: null,
       expenditures: null,
+      timers: null,
     };
 
     const settings: WidgetSettings = {

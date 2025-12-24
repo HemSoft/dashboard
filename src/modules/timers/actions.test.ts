@@ -316,10 +316,6 @@ describe("timers actions", () => {
     });
 
     it("starts timer successfully", async () => {
-      const selectChain = createChainMock({
-        data: { remaining_seconds: 300 },
-        error: null,
-      });
       const updateChain = createChainMock({ data: null, error: null });
 
       mockFrom.mockImplementation(() => ({
@@ -371,10 +367,6 @@ describe("timers actions", () => {
     });
 
     it("resets timer successfully", async () => {
-      const selectChain = createChainMock({
-        data: { duration_seconds: 300 },
-        error: null,
-      });
       const updateChain = createChainMock({ data: null, error: null });
 
       mockFrom.mockImplementation(() => ({

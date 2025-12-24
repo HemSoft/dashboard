@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Timer } from "../types";
 
 /**
@@ -9,51 +9,19 @@ import type { Timer } from "../types";
  */
 export function TimerAlertProvider() {
   const audioContextRef = useRef<AudioContext | null>(null);
+  // Initialize notification permission directly from the API
   const [notificationPermission, setNotificationPermission] =
-    useState<NotificationPermission>("default");
-
-  useEffect(() => {
-    // Initialize Web Audio API
-    if (typeof window !== "undefined" && "AudioContext" in window) {
-      audioContextRef.current = new AudioContext();
-    }
-
-    // Check notification permission
-    if (typeof window !== "undefined" && "Notification" in window) {
-      setNotificationPermission(Notification.permission);
-    }
-
-    // Listen for timer completion events
-    const handleTimerComplete = (event: Event) => {
-      const customEvent = event as CustomEvent<{ timer: Timer }>;
-      const timer = customEvent.detail.timer;
-
-      if (timer.enableAlarm) {
-        playAlarmSound();
+    useState<NotificationPermission>(() => {
+      if (typeof window !== "undefined" && "Notification" in window) {
+        return Notification.permission;
       }
-
-      // Show browser notification if permitted
-      if (notificationPermission === "granted") {
-        new Notification(`Timer Complete: ${timer.name}`, {
-          body: "Your timer has finished!",
-          icon: "/icon.svg",
-          tag: `timer-${timer.id}`,
-        });
-      }
-    };
-
-    window.addEventListener("timer-complete", handleTimerComplete);
-
-    return () => {
-      window.removeEventListener("timer-complete", handleTimerComplete);
-      audioContextRef.current?.close();
-    };
-  }, [notificationPermission]);
+      return "default";
+    });
 
   /**
    * Play a simple alarm tone using Web Audio API
    */
-  const playAlarmSound = () => {
+  const playAlarmSound = useCallback(() => {
     const context = audioContextRef.current;
     if (!context) return;
 
@@ -81,7 +49,40 @@ export function TimerAlertProvider() {
     } catch (error) {
       console.error("Error playing alarm sound:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Initialize Web Audio API
+    if (typeof window !== "undefined" && "AudioContext" in window) {
+      audioContextRef.current = new AudioContext();
+    }
+
+    // Listen for timer completion events
+    const handleTimerComplete = (event: Event) => {
+      const customEvent = event as CustomEvent<{ timer: Timer }>;
+      const timer = customEvent.detail.timer;
+
+      if (timer.enableAlarm) {
+        playAlarmSound();
+      }
+
+      // Show browser notification if permitted
+      if (notificationPermission === "granted") {
+        new Notification(`Timer Complete: ${timer.name}`, {
+          body: "Your timer has finished!",
+          icon: "/icon.svg",
+          tag: `timer-${timer.id}`,
+        });
+      }
+    };
+
+    window.addEventListener("timer-complete", handleTimerComplete);
+
+    return () => {
+      window.removeEventListener("timer-complete", handleTimerComplete);
+      audioContextRef.current?.close();
+    };
+  }, [notificationPermission, playAlarmSound]);
 
   const requestNotificationPermission = async () => {
     if (typeof window !== "undefined" && "Notification" in window) {
