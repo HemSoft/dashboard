@@ -98,6 +98,9 @@ export async function signInWithGoogle() {
   if (data.url) {
     redirect(data.url);
   }
+
+  // If no URL is provided, redirect to login with error
+  return redirect("/login?error=" + encodeURIComponent("Failed to initiate OAuth flow"));
 }
 
 export async function signOut() {

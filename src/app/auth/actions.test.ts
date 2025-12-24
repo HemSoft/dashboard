@@ -278,5 +278,20 @@ describe("auth actions", () => {
         "/login?error=OAuth%20provider%20not%20enabled"
       );
     });
+
+    it("redirects to login with error when OAuth returns no URL", async () => {
+      mockSignInWithOAuth.mockResolvedValue({
+        error: null,
+        data: { url: null },
+      });
+
+      await expect(signInWithGoogle()).rejects.toThrow(
+        "NEXT_REDIRECT:/login?error=Failed%20to%20initiate%20OAuth%20flow"
+      );
+
+      expect(mockRedirect).toHaveBeenCalledWith(
+        "/login?error=Failed%20to%20initiate%20OAuth%20flow"
+      );
+    });
   });
 });
