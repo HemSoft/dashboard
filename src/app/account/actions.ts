@@ -104,9 +104,23 @@ export async function changePassword(formData: FormData) {
     return redirect("/account?error=" + encodeURIComponent("User email not found."));
   }
 
+  // Require current password to be provided
+  if (!currentPassword) {
+    return redirect("/account?error=" + encodeURIComponent("Current password is required."));
+  }
+
   // Validate new password confirmation
   if (newPassword !== confirmNewPassword) {
     return redirect("/account?error=" + encodeURIComponent("New passwords do not match."));
+  }
+
+  // Validate new password strength: at least 6 characters, including letters and numbers
+  const passwordIsValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(newPassword);
+  if (!passwordIsValid) {
+    return redirect(
+      "/account?error=" +
+        encodeURIComponent("New password must be at least 6 characters and include letters and numbers.")
+    );
   }
 
   // Verify current password by attempting to sign in
@@ -116,7 +130,10 @@ export async function changePassword(formData: FormData) {
   });
 
   if (signInError) {
-    return redirect("/account?error=" + encodeURIComponent("Current password is incorrect."));
+    return redirect(
+      "/account?error=" +
+        encodeURIComponent("Unable to change password. Please check your current password and try again.")
+    );
   }
 
   // Update password
@@ -129,5 +146,5 @@ export async function changePassword(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/account?success=true");
+  redirect("/account?success=" + encodeURIComponent("Password changed successfully"));
 }

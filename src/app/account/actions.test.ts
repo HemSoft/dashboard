@@ -216,13 +216,31 @@ describe("account actions", () => {
       mockGetUser.mockResolvedValue({ data: { user: null } });
 
       const formData = new FormData();
-      formData.set("currentPassword", "oldPassword123");
-      formData.set("newPassword", "newPassword123");
-      formData.set("confirmNewPassword", "newPassword123");
+      formData.set("currentPassword", "oldPassword1");
+      formData.set("newPassword", "newPassword1");
+      formData.set("confirmNewPassword", "newPassword1");
 
       await expect(changePassword(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/login"
       );
+    });
+
+    it("redirects with error when current password is not provided", async () => {
+      mockGetUser.mockResolvedValue({ 
+        data: { user: { id: "user-123", email: "test@example.com" } } 
+      });
+
+      const formData = new FormData();
+      formData.set("currentPassword", "");
+      formData.set("newPassword", "newPassword1");
+      formData.set("confirmNewPassword", "newPassword1");
+
+      await expect(changePassword(formData)).rejects.toThrow(
+        "NEXT_REDIRECT:/account?error=Current%20password%20is%20required."
+      );
+
+      expect(mockSignInWithPassword).not.toHaveBeenCalled();
+      expect(mockUpdateUser).not.toHaveBeenCalled();
     });
 
     it("redirects with error when new passwords do not match", async () => {
@@ -231,12 +249,30 @@ describe("account actions", () => {
       });
 
       const formData = new FormData();
-      formData.set("currentPassword", "oldPassword123");
-      formData.set("newPassword", "newPassword123");
-      formData.set("confirmNewPassword", "differentPassword");
+      formData.set("currentPassword", "oldPassword1");
+      formData.set("newPassword", "newPassword1");
+      formData.set("confirmNewPassword", "differentPassword1");
 
       await expect(changePassword(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/account?error=New%20passwords%20do%20not%20match."
+      );
+
+      expect(mockSignInWithPassword).not.toHaveBeenCalled();
+      expect(mockUpdateUser).not.toHaveBeenCalled();
+    });
+
+    it("redirects with error when new password does not meet strength requirements", async () => {
+      mockGetUser.mockResolvedValue({ 
+        data: { user: { id: "user-123", email: "test@example.com" } } 
+      });
+
+      const formData = new FormData();
+      formData.set("currentPassword", "oldPassword1");
+      formData.set("newPassword", "weak");
+      formData.set("confirmNewPassword", "weak");
+
+      await expect(changePassword(formData)).rejects.toThrow(
+        "NEXT_REDIRECT:/account?error=New%20password%20must%20be%20at%20least%206%20characters%20and%20include%20letters%20and%20numbers."
       );
 
       expect(mockSignInWithPassword).not.toHaveBeenCalled();
@@ -252,22 +288,22 @@ describe("account actions", () => {
       });
 
       const formData = new FormData();
-      formData.set("currentPassword", "wrongPassword");
-      formData.set("newPassword", "newPassword123");
-      formData.set("confirmNewPassword", "newPassword123");
+      formData.set("currentPassword", "wrongPassword1");
+      formData.set("newPassword", "newPassword1");
+      formData.set("confirmNewPassword", "newPassword1");
 
       await expect(changePassword(formData)).rejects.toThrow(
-        "NEXT_REDIRECT:/account?error=Current%20password%20is%20incorrect."
+        "NEXT_REDIRECT:/account?error=Unable%20to%20change%20password.%20Please%20check%20your%20current%20password%20and%20try%20again."
       );
 
       expect(mockSignInWithPassword).toHaveBeenCalledWith({
         email: "test@example.com",
-        password: "wrongPassword",
+        password: "wrongPassword1",
       });
       expect(mockUpdateUser).not.toHaveBeenCalled();
     });
 
-    it("changes password successfully and redirects with success", async () => {
+    it("changes password successfully and redirects with success message", async () => {
       mockGetUser.mockResolvedValue({ 
         data: { user: { id: "user-123", email: "test@example.com" } } 
       });
@@ -275,20 +311,20 @@ describe("account actions", () => {
       mockUpdateUser.mockResolvedValue({ error: null });
 
       const formData = new FormData();
-      formData.set("currentPassword", "oldPassword123");
-      formData.set("newPassword", "newPassword123");
-      formData.set("confirmNewPassword", "newPassword123");
+      formData.set("currentPassword", "oldPassword1");
+      formData.set("newPassword", "newPassword1");
+      formData.set("confirmNewPassword", "newPassword1");
 
       await expect(changePassword(formData)).rejects.toThrow(
-        "NEXT_REDIRECT:/account?success=true"
+        "NEXT_REDIRECT:/account?success=Password%20changed%20successfully"
       );
 
       expect(mockSignInWithPassword).toHaveBeenCalledWith({
         email: "test@example.com",
-        password: "oldPassword123",
+        password: "oldPassword1",
       });
       expect(mockUpdateUser).toHaveBeenCalledWith({
-        password: "newPassword123",
+        password: "newPassword1",
       });
       expect(mockRevalidatePath).toHaveBeenCalledWith("/", "layout");
     });
@@ -303,16 +339,16 @@ describe("account actions", () => {
       });
 
       const formData = new FormData();
-      formData.set("currentPassword", "oldPassword123");
-      formData.set("newPassword", "newPassword123");
-      formData.set("confirmNewPassword", "newPassword123");
+      formData.set("currentPassword", "oldPassword1");
+      formData.set("newPassword", "newPassword1");
+      formData.set("confirmNewPassword", "newPassword1");
 
       await expect(changePassword(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/account?error=Password%20update%20failed"
       );
 
       expect(mockUpdateUser).toHaveBeenCalledWith({
-        password: "newPassword123",
+        password: "newPassword1",
       });
     });
 
@@ -322,9 +358,9 @@ describe("account actions", () => {
       });
 
       const formData = new FormData();
-      formData.set("currentPassword", "oldPassword123");
-      formData.set("newPassword", "newPassword123");
-      formData.set("confirmNewPassword", "newPassword123");
+      formData.set("currentPassword", "oldPassword1");
+      formData.set("newPassword", "newPassword1");
+      formData.set("confirmNewPassword", "newPassword1");
 
       await expect(changePassword(formData)).rejects.toThrow(
         "NEXT_REDIRECT:/account?error=User%20email%20not%20found."
