@@ -124,6 +124,7 @@ export type Database = {
           sidebar_width: number | null
           theme: string | null
           updated_at: string | null
+          widget_settings: Json | null
         }
         Insert: {
           display_name?: string | null
@@ -135,6 +136,7 @@ export type Database = {
           sidebar_width?: number | null
           theme?: string | null
           updated_at?: string | null
+          widget_settings?: Json | null
         }
         Update: {
           display_name?: string | null
@@ -146,6 +148,7 @@ export type Database = {
           sidebar_width?: number | null
           theme?: string | null
           updated_at?: string | null
+          widget_settings?: Json | null
         }
         Relationships: []
       }
