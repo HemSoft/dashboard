@@ -1,4 +1,4 @@
-import { GitPullRequest, Newspaper, Wallet } from "lucide-react";
+import { GitPullRequest, Newspaper, Timer, Wallet } from "lucide-react";
 import type { WidgetDefinition, WidgetId } from "./types";
 
 /**
@@ -26,6 +26,13 @@ export const WIDGET_REGISTRY: Record<WidgetId, WidgetDefinition> = {
     description: "Track subscriptions and consumption costs",
     icon: Wallet,
     requiresAdmin: true,
+    defaultEnabled: true,
+  },
+  timers: {
+    id: "timers",
+    name: "Timers",
+    description: "Countdown timers with alerts",
+    icon: Timer,
     defaultEnabled: true,
   },
 };
