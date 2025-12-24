@@ -85,3 +85,53 @@ export async function updateSidebarWidth(width: number): Promise<{ error?: strin
 
   return {};
 }
+
+export async function changePassword(formData: FormData) {
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
+  const confirmNewPassword = formData.get("confirmNewPassword") as string;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect("/login");
+  }
+
+  if (!user.email) {
+    return redirect("/account?error=" + encodeURIComponent("User email not found."));
+  }
+
+  // Require current password to be provided
+  if (!currentPassword) {
+    return redirect("/account?error=" + encodeURIComponent("Current password is required."));
+  }
+
+  // Validate new password confirmation
+  if (newPassword !== confirmNewPassword) {
+    return redirect("/account?error=" + encodeURIComponent("New passwords do not match."));
+  }
+
+  // Validate new password strength: at least 6 characters, including letters and numbers
+  const passwordIsValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(newPassword);
+  if (!passwordIsValid) {
+    return redirect(
+      "/account?error=" +
+        encodeURIComponent("New password must be at least 6 characters and include letters and numbers.")
+    );
+  }
+
+  // Update password using the existing authenticated session
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (updateError) {
+    return redirect("/account?error=" + encodeURIComponent(updateError.message));
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/account?success=true");
+}
