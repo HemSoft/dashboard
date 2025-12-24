@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-hardcoded-passwords -- Test file contains form field names 'password', not actual credentials */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock supabase client first (before imports that use it)
