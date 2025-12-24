@@ -85,3 +85,45 @@ export async function updateSidebarWidth(width: number): Promise<{ error?: strin
 
   return {};
 }
+
+export async function changePassword(formData: FormData) {
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
+  const confirmNewPassword = formData.get("confirmNewPassword") as string;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect("/login");
+  }
+
+  // Validate new password confirmation
+  if (newPassword !== confirmNewPassword) {
+    return redirect("/account?error=" + encodeURIComponent("New passwords do not match."));
+  }
+
+  // Verify current password by attempting to sign in
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password: currentPassword,
+  });
+
+  if (signInError) {
+    return redirect("/account?error=" + encodeURIComponent("Current password is incorrect."));
+  }
+
+  // Update password
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (updateError) {
+    return redirect("/account?error=" + encodeURIComponent(updateError.message));
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/account?success=true");
+}

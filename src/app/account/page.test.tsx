@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the getProfile action
 const mockGetProfile = vi.fn();
+const mockChangePassword = vi.fn();
 vi.mock("./actions", () => ({
   getProfile: () => mockGetProfile(),
   updateProfile: vi.fn(),
+  changePassword: () => mockChangePassword(),
 }));
 
 // Mock news-sources module
@@ -292,5 +294,20 @@ describe("AccountPage", () => {
     render(Page);
 
     expect(screen.getByText("Fetch: 60, Retention: 14")).toBeDefined();
+  });
+
+  it("renders password change section", async () => {
+    const Page = await AccountPage({
+      searchParams: Promise.resolve({}),
+    });
+
+    render(Page);
+
+    expect(screen.getByText("Password")).toBeDefined();
+    expect(screen.getByText("Change your password.")).toBeDefined();
+    expect(screen.getByLabelText("Current Password")).toBeDefined();
+    expect(screen.getByLabelText("New Password")).toBeDefined();
+    expect(screen.getByLabelText("Confirm New Password")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Change Password" })).toBeDefined();
   });
 });

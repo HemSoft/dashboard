@@ -12,7 +12,7 @@ import {
 import { ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getProfile, updateProfile } from "./actions";
+import { changePassword, getProfile, updateProfile } from "./actions";
 
 export default async function AccountPage({
   searchParams,
@@ -125,6 +125,57 @@ export default async function AccountPage({
             </div>
 
             <Button type="submit">Save Changes</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Password</CardTitle>
+          <CardDescription>Change your password.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={changePassword} className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="currentPassword" className="text-sm font-medium">
+                Current Password
+              </label>
+              <Input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="newPassword" className="text-sm font-medium">
+                New Password
+              </label>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Use at least 6 characters with a mix of letters and numbers.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="confirmNewPassword" className="text-sm font-medium">
+                Confirm New Password
+              </label>
+              <Input
+                id="confirmNewPassword"
+                name="confirmNewPassword"
+                type="password"
+                required
+              />
+            </div>
+
+            <Button type="submit">Change Password</Button>
           </form>
         </CardContent>
       </Card>
