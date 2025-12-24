@@ -303,7 +303,7 @@ describe("account actions", () => {
       expect(mockUpdateUser).not.toHaveBeenCalled();
     });
 
-    it("changes password successfully and redirects with success message", async () => {
+    it("changes password successfully and redirects with success", async () => {
       mockGetUser.mockResolvedValue({ 
         data: { user: { id: "user-123", email: "test@example.com" } } 
       });
@@ -316,7 +316,7 @@ describe("account actions", () => {
       formData.set("confirmNewPassword", "newPassword1");
 
       await expect(changePassword(formData)).rejects.toThrow(
-        "NEXT_REDIRECT:/account?success=Password%20changed%20successfully"
+        "NEXT_REDIRECT:/account?success=true"
       );
 
       expect(mockSignInWithPassword).toHaveBeenCalledWith({

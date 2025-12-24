@@ -157,8 +157,9 @@ export default async function AccountPage({
                 name="newPassword"
                 type="password"
                 required
+                aria-describedby="newPasswordHint"
               />
-              <p className="text-xs text-muted-foreground">
+              <p id="newPasswordHint" className="text-xs text-muted-foreground">
                 Use at least 6 characters with a mix of letters and numbers.
               </p>
             </div>

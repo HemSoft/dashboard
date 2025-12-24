@@ -146,5 +146,5 @@ export async function changePassword(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/account?success=" + encodeURIComponent("Password changed successfully"));
+  redirect("/account?success=true");
 }
