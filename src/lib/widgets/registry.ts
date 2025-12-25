@@ -1,4 +1,4 @@
-import { GitPullRequest, Newspaper, Wallet } from "lucide-react";
+import { GitPullRequest, Mail, Newspaper, Wallet } from "lucide-react";
 import type { WidgetDefinition, WidgetId } from "./types";
 
 /**
@@ -26,6 +26,13 @@ export const WIDGET_REGISTRY: Record<WidgetId, WidgetDefinition> = {
     description: "Track subscriptions and consumption costs",
     icon: Wallet,
     requiresAdmin: true,
+    defaultEnabled: true,
+  },
+  mail: {
+    id: "mail",
+    name: "Mail",
+    description: "Email summaries from Outlook, Gmail, and IMAP accounts",
+    icon: Mail,
     defaultEnabled: true,
   },
 };
