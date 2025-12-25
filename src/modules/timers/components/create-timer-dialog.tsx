@@ -32,7 +32,9 @@ export function CreateTimerDialog({ onCreated }: CreateTimerDialogProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || !Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+      return;
+    }
 
     setIsSubmitting(true);
     const result = await createTimer({
@@ -103,9 +105,14 @@ export function CreateTimerDialog({ onCreated }: CreateTimerDialogProps) {
               min="1"
               max="1440"
               value={Math.floor(durationSeconds / 60)}
-              onChange={(e) =>
-                setDurationSeconds(Math.max(1, parseInt(e.target.value) || 1) * 60)
-              }
+              onChange={(e) => {
+                const parsed = parseInt(e.target.value, 10);
+                const minutes = Math.min(
+                  1440,
+                  Math.max(1, isNaN(parsed) ? 1 : parsed)
+                );
+                setDurationSeconds(minutes * 60);
+              }}
             />
           </div>
 

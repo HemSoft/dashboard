@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Timer } from "../types";
 
@@ -53,8 +54,10 @@ export function TimerAlertProvider() {
 
   useEffect(() => {
     // Initialize Web Audio API
+    let audioContext: AudioContext | null = null;
     if (typeof window !== "undefined" && "AudioContext" in window) {
-      audioContextRef.current = new AudioContext();
+      audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
     }
 
     // Listen for timer completion events
@@ -62,15 +65,15 @@ export function TimerAlertProvider() {
       const customEvent = event as CustomEvent<{ timer: Timer }>;
       const timer = customEvent.detail.timer;
 
+      // Play audio if enabled
       if (timer.enableAlarm) {
         playAlarmSound();
       }
 
-      // Show browser notification if permitted
+      // Show browser notification if permitted (independent of audio setting)
       if (notificationPermission === "granted") {
         new Notification(`Timer Complete: ${timer.name}`, {
           body: "Your timer has finished!",
-          icon: "/icon.svg",
           tag: `timer-${timer.id}`,
         });
       }
@@ -80,7 +83,13 @@ export function TimerAlertProvider() {
 
     return () => {
       window.removeEventListener("timer-complete", handleTimerComplete);
-      audioContextRef.current?.close();
+      // Safely close AudioContext if it exists and isn't already closed
+      if (audioContext && audioContext.state !== "closed") {
+        audioContext.close().catch(() => {
+          // Ignore errors during cleanup
+        });
+      }
+      audioContextRef.current = null;
     };
   }, [notificationPermission, playAlarmSound]);
 
@@ -102,12 +111,9 @@ export function TimerAlertProvider() {
               Get notified when your timers complete
             </p>
           </div>
-          <button
-            onClick={requestNotificationPermission}
-            className="px-3 py-1 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
-          >
+          <Button size="sm" onClick={requestNotificationPermission}>
             Enable
-          </button>
+          </Button>
         </div>
       </div>
     );

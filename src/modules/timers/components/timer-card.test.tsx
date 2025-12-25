@@ -122,19 +122,21 @@ describe("TimerCard", () => {
 
     render(<TimerCard timer={baseTimer} onUpdate={onUpdate} />);
 
-    const deleteButtons = screen.getAllByRole("button");
-    const deleteButton = deleteButtons.find((btn) =>
-      btn.querySelector("svg.lucide-trash-2")
-    );
-    expect(deleteButton).toBeDefined();
+    const deleteButton = screen.getByRole("button", { name: /delete timer/i });
+    expect(deleteButton).toBeInTheDocument();
 
-    if (deleteButton) {
-      await userEvent.click(deleteButton);
-    }
+    await userEvent.click(deleteButton);
 
     // Just verify the mock was called
     expect(window.confirm).toHaveBeenCalled();
     expect(mockDeleteTimer).toHaveBeenCalledWith("timer-1");
+  });
+
+  it("has accessible label on delete button", () => {
+    render(<TimerCard timer={baseTimer} />);
+
+    const deleteButton = screen.getByRole("button", { name: "Delete timer Test Timer" });
+    expect(deleteButton).toBeInTheDocument();
   });
 
   it("does not delete when confirmation cancelled", async () => {
@@ -143,14 +145,9 @@ describe("TimerCard", () => {
 
     render(<TimerCard timer={baseTimer} onUpdate={onUpdate} />);
 
-    const deleteButtons = screen.getAllByRole("button");
-    const deleteButton = deleteButtons.find((btn) =>
-      btn.querySelector("svg.lucide-trash-2")
-    );
+    const deleteButton = screen.getByRole("button", { name: /delete timer/i });
 
-    if (deleteButton) {
-      await userEvent.click(deleteButton);
-    }
+    await userEvent.click(deleteButton);
 
     // Just verify delete wasn't called
     expect(window.confirm).toHaveBeenCalled();

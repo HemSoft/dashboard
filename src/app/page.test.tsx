@@ -43,6 +43,10 @@ vi.mock("@/modules/expenditures", () => ({
   ),
 }));
 
+vi.mock("@/modules/timers", () => ({
+  TimerWidget: () => <div data-testid="timer-widget">Timer Widget</div>,
+}));
+
 vi.mock("@/components/landing", () => ({
   LandingPage: () => <div data-testid="landing-page">Landing Page</div>,
 }));

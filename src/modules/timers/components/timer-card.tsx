@@ -32,15 +32,13 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
   }, [initialTimer]);
 
   const handleComplete = useCallback(async () => {
-    // Timer completed, trigger alarm if enabled
-    if (timer.enableAlarm) {
-      // Web Audio API alarm will be triggered by TimerAlertProvider
-      window.dispatchEvent(
-        new CustomEvent("timer-complete", {
-          detail: { timer },
-        })
-      );
-    }
+    // Timer completed - dispatch event for TimerAlertProvider
+    // The provider handles both audio (gated by enableAlarm) and notifications independently
+    window.dispatchEvent(
+      new CustomEvent("timer-complete", {
+        detail: { timer },
+      })
+    );
     onUpdate?.();
   }, [timer, onUpdate]);
 
@@ -50,12 +48,13 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
 
     const interval = setInterval(() => {
       setLocalRemaining((prev) => {
-        if (prev <= 0) {
+        const next = prev - 1;
+        if (next <= 0) {
           clearInterval(interval);
           handleComplete();
           return 0;
         }
-        return prev - 1;
+        return next;
       });
     }, 1000);
 
@@ -113,6 +112,7 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
             className="h-8 w-8 text-destructive"
             onClick={handleDelete}
             disabled={isDeleting}
+            aria-label={`Delete timer ${timer.name}`}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

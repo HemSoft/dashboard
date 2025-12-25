@@ -150,6 +150,46 @@ describe("timers actions", () => {
       expect(result.error).toBe("Not authenticated");
     });
 
+    it("returns error when name is empty", async () => {
+      const result = await createTimer({
+        name: "   ",
+        durationSeconds: 300,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Timer name is required");
+    });
+
+    it("returns error when name exceeds max length", async () => {
+      const result = await createTimer({
+        name: "a".repeat(101),
+        durationSeconds: 300,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Timer name must be 100 characters or less");
+    });
+
+    it("returns error when durationSeconds is less than 1", async () => {
+      const result = await createTimer({
+        name: "Test Timer",
+        durationSeconds: 0,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Duration must be at least 1 second");
+    });
+
+    it("returns error when durationSeconds exceeds 24 hours", async () => {
+      const result = await createTimer({
+        name: "Test Timer",
+        durationSeconds: 86401,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Duration cannot exceed 24 hours");
+    });
+
     it("creates timer successfully", async () => {
       const selectChain = createChainMock({ data: [], error: null });
       const insertChain = createChainMock({
@@ -217,6 +257,55 @@ describe("timers actions", () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Not authenticated");
+    });
+
+    it("returns error when name is empty", async () => {
+      const result = await updateTimer("timer-1", { name: "   " });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Timer name cannot be empty");
+    });
+
+    it("returns error when name exceeds max length", async () => {
+      const result = await updateTimer("timer-1", { name: "a".repeat(101) });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Timer name must be 100 characters or less");
+    });
+
+    it("returns error when durationSeconds is less than 1", async () => {
+      const result = await updateTimer("timer-1", { durationSeconds: 0 });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Duration must be at least 1 second");
+    });
+
+    it("returns error when durationSeconds exceeds 24 hours", async () => {
+      const result = await updateTimer("timer-1", { durationSeconds: 86401 });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Duration cannot exceed 24 hours");
+    });
+
+    it("returns error when remainingSeconds is negative", async () => {
+      const result = await updateTimer("timer-1", { remainingSeconds: -1 });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Remaining seconds must be non-negative");
+    });
+
+    it("returns error when state is invalid", async () => {
+      const result = await updateTimer("timer-1", { state: "invalid" as "stopped" });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Invalid timer state");
+    });
+
+    it("returns error when displayOrder is negative", async () => {
+      const result = await updateTimer("timer-1", { displayOrder: -1 });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Display order must be non-negative");
     });
 
     it("updates timer successfully", async () => {

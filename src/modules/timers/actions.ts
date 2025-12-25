@@ -77,6 +77,11 @@ export async function getTimers(): Promise<FetchTimersResult> {
 /**
  * Create a new timer
  */
+// Validation constants
+const MAX_NAME_LENGTH = 100;
+const MAX_DURATION_SECONDS = 86400; // 24 hours
+const MIN_DURATION_SECONDS = 1;
+
 export async function createTimer(
   input: TimerInput
 ): Promise<UpdateResult & { id?: string }> {
@@ -87,6 +92,23 @@ export async function createTimer(
 
   if (!user) {
     return { success: false, error: "Not authenticated" };
+  }
+
+  // Validate name
+  const trimmedName = input.name?.trim();
+  if (!trimmedName) {
+    return { success: false, error: "Timer name is required" };
+  }
+  if (trimmedName.length > MAX_NAME_LENGTH) {
+    return { success: false, error: `Timer name must be ${MAX_NAME_LENGTH} characters or less` };
+  }
+
+  // Validate duration
+  if (!Number.isFinite(input.durationSeconds) || input.durationSeconds < MIN_DURATION_SECONDS) {
+    return { success: false, error: "Duration must be at least 1 second" };
+  }
+  if (input.durationSeconds > MAX_DURATION_SECONDS) {
+    return { success: false, error: "Duration cannot exceed 24 hours" };
   }
 
   // Get the highest display_order to add new timer at the end
@@ -103,7 +125,7 @@ export async function createTimer(
     .from("timers" as never)
     .insert({
       user_id: user.id,
-      name: input.name,
+      name: trimmedName,
       duration_seconds: input.durationSeconds,
       remaining_seconds: input.durationSeconds,
       state: "stopped",
@@ -129,6 +151,85 @@ export async function createTimer(
 /**
  * Update an existing timer
  */
+const VALID_TIMER_STATES = ["stopped", "running", "paused", "completed"] as const;
+
+function validateName(name: string | undefined): string | undefined {
+  if (name === undefined) return undefined;
+  const trimmedName = name.trim();
+  if (!trimmedName) return "Timer name cannot be empty";
+  if (trimmedName.length > MAX_NAME_LENGTH) {
+    return `Timer name must be ${MAX_NAME_LENGTH} characters or less`;
+  }
+  return undefined;
+}
+
+function validateDuration(durationSeconds: number | undefined): string | undefined {
+  if (durationSeconds === undefined) return undefined;
+  if (!Number.isFinite(durationSeconds) || durationSeconds < MIN_DURATION_SECONDS) {
+    return "Duration must be at least 1 second";
+  }
+  if (durationSeconds > MAX_DURATION_SECONDS) {
+    return "Duration cannot exceed 24 hours";
+  }
+  return undefined;
+}
+
+function validateRemainingSeconds(remainingSeconds: number | undefined): string | undefined {
+  if (remainingSeconds === undefined) return undefined;
+  if (!Number.isFinite(remainingSeconds) || remainingSeconds < 0) {
+    return "Remaining seconds must be non-negative";
+  }
+  return undefined;
+}
+
+function validateState(state: string | undefined): string | undefined {
+  if (state === undefined) return undefined;
+  if (!VALID_TIMER_STATES.includes(state as typeof VALID_TIMER_STATES[number])) {
+    return "Invalid timer state";
+  }
+  return undefined;
+}
+
+function validateDisplayOrder(displayOrder: number | undefined): string | undefined {
+  if (displayOrder === undefined) return undefined;
+  if (!Number.isFinite(displayOrder) || displayOrder < 0) {
+    return "Display order must be non-negative";
+  }
+  return undefined;
+}
+
+/**
+ * Validate timer update input fields
+ * Returns error message if validation fails, undefined if valid
+ */
+function validateTimerUpdateInput(input: TimerUpdateInput): string | undefined {
+  return (
+    validateName(input.name) ??
+    validateDuration(input.durationSeconds) ??
+    validateRemainingSeconds(input.remainingSeconds) ??
+    validateState(input.state) ??
+    validateDisplayOrder(input.displayOrder)
+  );
+}
+
+/**
+ * Build update data object from input
+ */
+function buildTimerUpdateData(input: TimerUpdateInput): Record<string, unknown> {
+  const updateData: Record<string, unknown> = {};
+  if (input.name !== undefined) updateData.name = input.name.trim();
+  if (input.durationSeconds !== undefined) updateData.duration_seconds = input.durationSeconds;
+  if (input.remainingSeconds !== undefined) updateData.remaining_seconds = input.remainingSeconds;
+  if (input.state !== undefined) updateData.state = input.state;
+  if (input.endTime !== undefined) updateData.end_time = input.endTime ? input.endTime.toISOString() : null;
+  if (input.enableCompletionColor !== undefined) updateData.enable_completion_color = input.enableCompletionColor;
+  if (input.completionColor !== undefined) updateData.completion_color = input.completionColor;
+  if (input.enableAlarm !== undefined) updateData.enable_alarm = input.enableAlarm;
+  if (input.alarmSound !== undefined) updateData.alarm_sound = input.alarmSound;
+  if (input.displayOrder !== undefined) updateData.display_order = input.displayOrder;
+  return updateData;
+}
+
 export async function updateTimer(
   id: string,
   input: TimerUpdateInput
@@ -142,25 +243,12 @@ export async function updateTimer(
     return { success: false, error: "Not authenticated" };
   }
 
-  const updateData: Record<string, unknown> = {};
-  if (input.name !== undefined) updateData.name = input.name;
-  if (input.durationSeconds !== undefined)
-    updateData.duration_seconds = input.durationSeconds;
-  if (input.remainingSeconds !== undefined)
-    updateData.remaining_seconds = input.remainingSeconds;
-  if (input.state !== undefined) updateData.state = input.state;
-  if (input.endTime !== undefined)
-    updateData.end_time = input.endTime ? input.endTime.toISOString() : null;
-  if (input.enableCompletionColor !== undefined)
-    updateData.enable_completion_color = input.enableCompletionColor;
-  if (input.completionColor !== undefined)
-    updateData.completion_color = input.completionColor;
-  if (input.enableAlarm !== undefined)
-    updateData.enable_alarm = input.enableAlarm;
-  if (input.alarmSound !== undefined)
-    updateData.alarm_sound = input.alarmSound;
-  if (input.displayOrder !== undefined)
-    updateData.display_order = input.displayOrder;
+  const validationError = validateTimerUpdateInput(input);
+  if (validationError) {
+    return { success: false, error: validationError };
+  }
+
+  const updateData = buildTimerUpdateData(input);
 
   const { error } = await supabase
     .from("timers" as never)
