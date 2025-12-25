@@ -385,6 +385,8 @@ export type Database = {
           token_expires_at: string | null
           iv: string
           auth_tag: string
+          refresh_token_iv: string | null
+          refresh_token_auth_tag: string | null
           created_at: string
           updated_at: string
         }
@@ -396,6 +398,8 @@ export type Database = {
           token_expires_at?: string | null
           iv: string
           auth_tag: string
+          refresh_token_iv?: string | null
+          refresh_token_auth_tag?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -407,6 +411,8 @@ export type Database = {
           token_expires_at?: string | null
           iv?: string
           auth_tag?: string
+          refresh_token_iv?: string | null
+          refresh_token_auth_tag?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -9,6 +9,7 @@ import type { DecryptedToken, TokenInput } from "../types";
 
 /**
  * Store encrypted tokens for a mail account
+ * Each token (access and refresh) gets its own unique IV and auth_tag for AES-256-GCM security
  */
 export async function storeToken(input: TokenInput): Promise<{ success: boolean; error?: string }> {
   try {
@@ -17,7 +18,7 @@ export async function storeToken(input: TokenInput): Promise<{ success: boolean;
     // Encrypt access token
     const accessTokenEncrypted = encrypt(input.accessToken);
     
-    // Encrypt refresh token if provided
+    // Encrypt refresh token if provided (with its own IV and auth_tag)
     let refreshTokenEncrypted: { encrypted: string; iv: string; authTag: string } | null = null;
     if (input.refreshToken) {
       refreshTokenEncrypted = encrypt(input.refreshToken);
@@ -36,10 +37,12 @@ export async function storeToken(input: TokenInput): Promise<{ success: boolean;
         .from("mail_oauth_tokens")
         .update({
           encrypted_access_token: accessTokenEncrypted.encrypted,
-          encrypted_refresh_token: refreshTokenEncrypted?.encrypted || null,
-          token_expires_at: input.expiresAt?.toISOString() || null,
+          encrypted_refresh_token: refreshTokenEncrypted?.encrypted ?? null,
+          token_expires_at: input.expiresAt?.toISOString() ?? null,
           iv: accessTokenEncrypted.iv,
           auth_tag: accessTokenEncrypted.authTag,
+          refresh_token_iv: refreshTokenEncrypted?.iv ?? null,
+          refresh_token_auth_tag: refreshTokenEncrypted?.authTag ?? null,
         })
         .eq("id", existing.id);
 
@@ -54,10 +57,12 @@ export async function storeToken(input: TokenInput): Promise<{ success: boolean;
         .insert({
           account_id: input.accountId,
           encrypted_access_token: accessTokenEncrypted.encrypted,
-          encrypted_refresh_token: refreshTokenEncrypted?.encrypted || null,
-          token_expires_at: input.expiresAt?.toISOString() || null,
+          encrypted_refresh_token: refreshTokenEncrypted?.encrypted ?? null,
+          token_expires_at: input.expiresAt?.toISOString() ?? null,
           iv: accessTokenEncrypted.iv,
           auth_tag: accessTokenEncrypted.authTag,
+          refresh_token_iv: refreshTokenEncrypted?.iv ?? null,
+          refresh_token_auth_tag: refreshTokenEncrypted?.authTag ?? null,
         });
 
       if (error) {
@@ -98,13 +103,13 @@ export async function getToken(accountId: string): Promise<DecryptedToken | null
       data.auth_tag
     );
 
-    // Decrypt refresh token if present
+    // Decrypt refresh token if present (using its own IV and auth_tag)
     let refreshToken: string | null = null;
-    if (data.encrypted_refresh_token) {
+    if (data.encrypted_refresh_token && data.refresh_token_iv && data.refresh_token_auth_tag) {
       refreshToken = decrypt(
         data.encrypted_refresh_token,
-        data.iv,
-        data.auth_tag
+        data.refresh_token_iv,
+        data.refresh_token_auth_tag
       );
     }
 
