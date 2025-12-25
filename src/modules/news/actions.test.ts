@@ -1,22 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("./lib/fetcher", () => ({
-  fetchAllNews: vi.fn().mockResolvedValue({
-    items: [
-      {
-        id: "1",
-        title: "Test News",
-        summary: "Test summary",
-        source: "Test Source",
-        url: "https://example.com",
-        publishedAt: new Date("2025-12-20T10:00:00Z"),
-        category: "dev",
-      },
-    ],
-    errors: [],
-  }),
-}));
-
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: (path: string) => mockRevalidatePath(path),
@@ -34,15 +17,117 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
-import { fetchNews, getNewsLastSeenAt, markNewsAsRead, revalidateNews } from "./actions";
+import {
+  excludeSource,
+  getNewsItems,
+  getNewsLastSeenAt,
+  getSourcesWithExclusion,
+  getUserExcludedSources,
+  includeSource,
+  markNewsAsRead,
+  revalidateNews,
+  toggleSourceExclusion,
+} from "./actions";
 
 describe("News Actions", () => {
-  describe("fetchNews", () => {
-    it("returns news items and errors", async () => {
-      const result = await fetchNews();
+  describe("getNewsItems", () => {
+    it("returns news items from database", async () => {
+      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockFrom.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({
+              data: [
+                {
+                  id: "1",
+                  title: "Test News",
+                  summary: "Test summary",
+                  link: "https://example.com",
+                  image_url: null,
+                  published_at: "2025-12-20T10:00:00Z",
+                  source_id: "source-1",
+                  news_sources: {
+                    id: "source-1",
+                    name: "Test Source",
+                    icon_name: "rocket",
+                    brand_color: "orange",
+                    category: "dev",
+                  },
+                },
+              ],
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      const result = await getNewsItems();
       expect(result.items).toHaveLength(1);
       expect(result.items[0].title).toBe("Test News");
-      expect(result.errors).toHaveLength(0);
+      expect(result.items[0].source.name).toBe("Test Source");
+      expect(result.error).toBeNull();
+    });
+
+    it("filters out excluded sources for authenticated users", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: "user-123" } },
+      });
+      mockFrom
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnValue({
+            order: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue({
+                data: [
+                  {
+                    id: "1",
+                    title: "Test News",
+                    summary: "Test summary",
+                    link: "https://example.com",
+                    image_url: null,
+                    published_at: "2025-12-20T10:00:00Z",
+                    source_id: "source-1",
+                    news_sources: {
+                      id: "source-1",
+                      name: "Test Source",
+                      icon_name: "rocket",
+                      brand_color: "orange",
+                      category: "dev",
+                    },
+                  },
+                ],
+                error: null,
+              }),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({
+              data: [{ source_id: "source-1" }],
+            }),
+          }),
+        });
+
+      const result = await getNewsItems();
+      expect(result.items).toHaveLength(0); // Filtered out
+    });
+
+    it("returns empty array and error on database error", async () => {
+      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockFrom.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({
+              data: null,
+              error: { message: "Database error" },
+            }),
+          }),
+        }),
+      });
+
+      const result = await getNewsItems();
+      expect(result.items).toHaveLength(0);
+      expect(result.error).toBe("Database error");
     });
   });
 
@@ -139,6 +224,186 @@ describe("News Actions", () => {
 
       const result = await markNewsAsRead();
       expect(result).toEqual({ success: false });
+    });
+  });
+
+  describe("getSourcesWithExclusion", () => {
+    it("returns sources with exclusion status", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: "user-123" } },
+      });
+      mockFrom
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              order: vi.fn().mockResolvedValue({
+                data: [
+                  {
+                    id: "source-1",
+                    name: "Source 1",
+                    icon_name: "rocket",
+                    brand_color: "orange",
+                    category: "dev",
+                  },
+                ],
+                error: null,
+              }),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({
+              data: [],
+            }),
+          }),
+        });
+
+      const result = await getSourcesWithExclusion();
+      expect(result.sources).toHaveLength(1);
+      expect(result.sources[0].name).toBe("Source 1");
+      expect(result.sources[0].isExcluded).toBe(false);
+    });
+  });
+
+  describe("getUserExcludedSources", () => {
+    it("returns empty array when not authenticated", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: null },
+      });
+
+      const result = await getUserExcludedSources();
+      expect(result).toEqual([]);
+    });
+
+    it("returns excluded source IDs", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: "user-123" } },
+      });
+      mockFrom.mockReturnValueOnce({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
+            data: [{ source_id: "source-1" }, { source_id: "source-2" }],
+          }),
+        }),
+      });
+
+      const result = await getUserExcludedSources();
+      expect(result).toEqual(["source-1", "source-2"]);
+    });
+  });
+
+  describe("toggleSourceExclusion", () => {
+    it("returns failure when not authenticated", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: null },
+      });
+
+      const result = await toggleSourceExclusion("source-1");
+      expect(result).toEqual({ success: false, isExcluded: false });
+    });
+
+    it("removes exclusion when source is already excluded", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: "user-123" } },
+      });
+      mockFrom
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                single: vi.fn().mockResolvedValue({ data: { source_id: "source-1" } }),
+              }),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          delete: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ error: null }),
+            }),
+          }),
+        });
+      mockRevalidatePath.mockClear();
+
+      const result = await toggleSourceExclusion("source-1");
+      expect(result).toEqual({ success: true, isExcluded: false });
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/news");
+    });
+
+    it("adds exclusion when source is not excluded", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: "user-123" } },
+      });
+      mockFrom
+        .mockReturnValueOnce({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                single: vi.fn().mockResolvedValue({ data: null }),
+              }),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          insert: vi.fn().mockResolvedValue({ error: null }),
+        });
+      mockRevalidatePath.mockClear();
+
+      const result = await toggleSourceExclusion("source-1");
+      expect(result).toEqual({ success: true, isExcluded: true });
+    });
+  });
+
+  describe("excludeSource", () => {
+    it("returns failure when not authenticated", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: null },
+      });
+
+      const result = await excludeSource("source-1");
+      expect(result).toEqual({ success: false });
+    });
+
+    it("upserts exclusion record", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: "user-123" } },
+      });
+      mockFrom.mockReturnValueOnce({
+        upsert: vi.fn().mockResolvedValue({ error: null }),
+      });
+      mockRevalidatePath.mockClear();
+
+      const result = await excludeSource("source-1");
+      expect(result).toEqual({ success: true });
+    });
+  });
+
+  describe("includeSource", () => {
+    it("returns failure when not authenticated", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: null },
+      });
+
+      const result = await includeSource("source-1");
+      expect(result).toEqual({ success: false });
+    });
+
+    it("deletes exclusion record", async () => {
+      mockGetUser.mockResolvedValueOnce({
+        data: { user: { id: "user-123" } },
+      });
+      mockFrom.mockReturnValueOnce({
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        }),
+      });
+      mockRevalidatePath.mockClear();
+
+      const result = await includeSource("source-1");
+      expect(result).toEqual({ success: true });
     });
   });
 });
