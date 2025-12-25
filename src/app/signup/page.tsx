@@ -1,5 +1,5 @@
-import { AuthLayout } from "@/components/landing";
 import { GoogleIcon } from "@/components/icons/google-icon";
+import { AuthLayout } from "@/components/landing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
