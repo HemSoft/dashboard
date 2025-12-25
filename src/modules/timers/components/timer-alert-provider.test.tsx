@@ -1,8 +1,8 @@
-import { render, screen, act } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
-import { TimerAlertProvider } from "./timer-alert-provider";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Timer } from "../types";
+import { TimerAlertProvider } from "./timer-alert-provider";
 
 // Track mocks at module level
 let mockCreateOscillator: ReturnType<typeof vi.fn>;
@@ -48,7 +48,7 @@ describe("TimerAlertProvider", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset mock functions
     mockOscillator = {
       connect: vi.fn(),
@@ -68,7 +68,7 @@ describe("TimerAlertProvider", () => {
     mockCreateOscillator = vi.fn(() => mockOscillator);
     mockCreateGain = vi.fn(() => mockGainNode);
     mockClose = vi.fn().mockResolvedValue(undefined);
-    
+
     // Store originals
     originalNotification = globalThis.Notification;
     originalAudioContext = globalThis.AudioContext;
@@ -284,7 +284,7 @@ describe("TimerAlertProvider", () => {
     mockClose.mockRejectedValueOnce(new Error("Close error"));
 
     const { unmount } = render(<TimerAlertProvider />);
-    
+
     // Should not throw
     expect(() => unmount()).not.toThrow();
   });

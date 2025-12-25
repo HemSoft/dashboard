@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createTimer,
-  deleteTimer,
-  getTimers,
-  pauseTimer,
-  resetTimer,
-  startTimer,
-  updateTimer,
+    createTimer,
+    deleteTimer,
+    getTimers,
+    pauseTimer,
+    resetTimer,
+    startTimer,
+    updateTimer,
 } from "./actions";
 
 vi.mock("next/cache", () => ({

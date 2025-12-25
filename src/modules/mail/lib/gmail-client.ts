@@ -13,11 +13,11 @@
  */
 
 import type {
-  BulkActionType,
-  MailFolder,
-  MailMessage,
-  SearchRequest,
-  SearchResult,
+    BulkActionType,
+    MailFolder,
+    MailMessage,
+    SearchRequest,
+    SearchResult,
 } from "../types";
 import { getToken, isTokenExpired } from "./token-manager";
 
@@ -44,7 +44,7 @@ export async function getGmailUnreadCount(accountId: string): Promise<number> {
 
     // Placeholder: Implement Gmail API call
     // GET https://gmail.googleapis.com/gmail/v1/users/me/labels/INBOX
-    
+
     // Placeholder: return 0 for now
     return 0;
   } catch (error) {
@@ -71,7 +71,7 @@ export async function getGmailMessages(
     // Placeholder: Implement Gmail API calls
     // 1. GET https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds={folder}&maxResults={maxResults}
     // 2. For each message, GET https://gmail.googleapis.com/gmail/v1/users/me/messages/{id}
-    
+
     // Placeholder: return empty array for now
     return [];
   } catch (error) {
@@ -100,7 +100,7 @@ export async function performGmailBulkAction(
     // - markUnread: POST /users/me/messages/batchModify with addLabelIds: ["UNREAD"]
     // - moveToJunk: POST /users/me/messages/batchModify with addLabelIds: ["SPAM"]
     // - delete: POST /users/me/messages/batchDelete with ids array
-    
+
     // Placeholder: return success for now
     return { success: true, processedCount: messageIds.length };
   } catch (error) {
@@ -124,7 +124,7 @@ export async function searchGmailMessages(
 
     // Placeholder: Implement Gmail API search
     // GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q={query}
-    
+
     // Placeholder: return empty results for now
     return { messages: [], hasMore: false };
   } catch (error) {
@@ -146,7 +146,7 @@ export async function getGmailFolders(accountId: string): Promise<MailFolder[]> 
 
     // Placeholder: Implement Gmail API call
     // GET https://gmail.googleapis.com/gmail/v1/users/me/labels
-    
+
     // Placeholder: return standard labels
     return [
       { id: "INBOX", displayName: "Inbox", type: "inbox", unreadCount: 0, totalCount: 0 },

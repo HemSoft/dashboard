@@ -1,6 +1,6 @@
+import { Check, Mail, Paperclip } from "lucide-react";
 import type { MailMessage } from "../types";
 import { formatMailAddress } from "../types";
-import { Mail, Paperclip, Check } from "lucide-react";
 
 interface MailItemProps {
   message: MailMessage;
@@ -47,7 +47,7 @@ export function MailItem({ message, isSelected = false, onSelect }: MailItemProp
           />
         )}
       </div>
-      
+
       <div className="flex-grow min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1">
           <div className="font-medium text-sm truncate">
@@ -60,15 +60,15 @@ export function MailItem({ message, isSelected = false, onSelect }: MailItemProp
             })}
           </div>
         </div>
-        
+
         <div className={`text-sm mb-1 truncate ${message.isRead ? "font-normal" : "font-semibold"}`}>
           {message.subject || "(No subject)"}
         </div>
-        
+
         <div className="text-xs text-muted-foreground line-clamp-2">
           {message.preview}
         </div>
-        
+
         {message.hasAttachments && (
           <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
             <Paperclip className="h-3 w-3" />

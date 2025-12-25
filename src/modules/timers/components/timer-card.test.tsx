@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { TimerCard } from "./timer-card";
 import type { Timer } from "../types";
+import { TimerCard } from "./timer-card";
 
 const mockDeleteTimer = vi.fn();
 const mockStartTimer = vi.fn();

@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createMailAccount,
-  deleteMailAccount,
-  getMailAccounts,
-  getMailSummary,
-  storeAccountCredentials,
-  updateMailAccount,
+    createMailAccount,
+    deleteMailAccount,
+    getMailAccounts,
+    getMailSummary,
+    storeAccountCredentials,
+    updateMailAccount,
 } from "./actions";
 
 vi.mock("next/cache", () => ({

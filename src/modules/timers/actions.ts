@@ -3,11 +3,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type {
-  FetchTimersResult,
-  Timer,
-  TimerInput,
-  TimerUpdateInput,
-  UpdateResult,
+    FetchTimersResult,
+    Timer,
+    TimerInput,
+    TimerUpdateInput,
+    UpdateResult,
 } from "./types";
 import { syncTimerState } from "./types";
 

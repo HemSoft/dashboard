@@ -13,11 +13,11 @@
  */
 
 import type {
-  BulkActionType,
-  MailFolder,
-  MailMessage,
-  SearchRequest,
-  SearchResult,
+    BulkActionType,
+    MailFolder,
+    MailMessage,
+    SearchRequest,
+    SearchResult,
 } from "../types";
 import { getToken } from "./token-manager";
 
@@ -45,7 +45,7 @@ export async function getImapUnreadCount(accountId: string): Promise<number> {
     // Placeholder: Implement IMAP connection and STATUS command
     // For now, use env variables for hemmer.us
     const host = process.env.IMAP_HEMMER_HOST;
-    
+
     if (!host) {
       console.error("IMAP host not configured");
       return 0;
@@ -55,7 +55,7 @@ export async function getImapUnreadCount(accountId: string): Promise<number> {
     // 1. Connect to IMAP server
     // 2. Authenticate with credentials from token
     // 3. Execute STATUS INBOX (UNSEEN)
-    
+
     // Placeholder: return 0 for now
     return 0;
   } catch (error) {
@@ -84,7 +84,7 @@ export async function getImapMessages(
     // 2. Authenticate with credentials from token
     // 3. SELECT folder
     // 4. FETCH last {maxResults} messages (FLAGS, ENVELOPE, BODYSTRUCTURE)
-    
+
     // Placeholder: return empty array for now
     return [];
   } catch (error) {
@@ -113,7 +113,7 @@ export async function performImapBulkAction(
     // - markUnread: STORE -FLAGS (\Seen)
     // - moveToJunk: MOVE to Junk folder
     // - delete: STORE +FLAGS (\Deleted) + EXPUNGE
-    
+
     // Placeholder: return success for now
     return { success: true, processedCount: messageIds.length };
   } catch (error) {
@@ -140,7 +140,7 @@ export async function searchImapMessages(
     // 2. Authenticate with credentials from token
     // 3. SELECT folder
     // 4. SEARCH with query (e.g., SUBJECT "query" OR FROM "query")
-    
+
     // Placeholder: return empty results for now
     return { messages: [], hasMore: false };
   } catch (error) {
@@ -164,7 +164,7 @@ export async function getImapFolders(accountId: string): Promise<MailFolder[]> {
     // 1. Connect to IMAP server
     // 2. Authenticate with credentials from token
     // 3. Execute LIST "" "*" to get all folders
-    
+
     // Placeholder: return standard folders
     return [
       { id: "INBOX", displayName: "Inbox", type: "inbox", unreadCount: 0, totalCount: 0 },

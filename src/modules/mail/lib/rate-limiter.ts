@@ -61,7 +61,7 @@ export function checkRateLimit(key: string): { allowed: boolean; remaining: numb
   // Increment count
   entry.count++;
   rateLimits.set(key, entry);
-  
+
   return { allowed: true, remaining: MAX_REQUESTS_PER_MINUTE - entry.count };
 }
 

@@ -13,11 +13,11 @@
  */
 
 import type {
-  BulkActionType,
-  MailFolder,
-  MailMessage,
-  SearchRequest,
-  SearchResult,
+    BulkActionType,
+    MailFolder,
+    MailMessage,
+    SearchRequest,
+    SearchResult,
 } from "../types";
 import { getToken, isTokenExpired } from "./token-manager";
 
@@ -44,7 +44,7 @@ export async function getOutlookUnreadCount(accountId: string): Promise<number> 
 
     // Placeholder: Implement Microsoft Graph API call
     // GET https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$count=true&$filter=isRead eq false
-    
+
     // Placeholder: return 0 for now
     return 0;
   } catch (error) {
@@ -70,7 +70,7 @@ export async function getOutlookMessages(
 
     // Placeholder: Implementation requires Microsoft Graph API integration
     // GET https://graph.microsoft.com/v1.0/me/mailFolders/{folder}/messages?$top={maxResults}
-    
+
     return [];
   } catch (error) {
     console.error("Error fetching Outlook messages:", error);
@@ -98,7 +98,7 @@ export async function performOutlookBulkAction(
     // - markUnread: PATCH /messages/{id} with { isRead: false }
     // - moveToJunk: POST /messages/{id}/move with destinationId
     // - delete: DELETE /messages/{id}
-    
+
     return { success: true, processedCount: messageIds.length };
   } catch (error) {
     console.error("Error performing Outlook bulk action:", error);
@@ -121,7 +121,7 @@ export async function searchOutlookMessages(
 
     // Placeholder: Implement Microsoft Graph API search
     // GET https://graph.microsoft.com/v1.0/me/messages?$search="{query}"
-    
+
     // Placeholder: return empty results for now
     return { messages: [], hasMore: false };
   } catch (error) {
@@ -143,7 +143,7 @@ export async function getOutlookFolders(accountId: string): Promise<MailFolder[]
 
     // Placeholder: Implement Microsoft Graph API call
     // GET https://graph.microsoft.com/v1.0/me/mailFolders
-    
+
     // Placeholder: return standard folders
     return [
       { id: "inbox", displayName: "Inbox", type: "inbox", unreadCount: 0, totalCount: 0 },
