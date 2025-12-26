@@ -26,6 +26,7 @@ import { getGravatarUrl } from "@/lib/gravatar";
 import { APP_NAME, APP_VERSION } from "@/lib/version";
 import {
     ChevronUp,
+    Clock,
     GitPullRequest,
     LayoutDashboard,
     Newspaper,
@@ -42,6 +43,7 @@ const navigation = [
   { name: "Pull Requests", href: "/prs", icon: GitPullRequest },
   { name: "News", href: "/news", icon: Newspaper },
   { name: "Expenditures", href: "/expenditures", icon: Wallet },
+  { name: "Timers", href: "/timers", icon: Clock },
 ];
 
 const adminNavigation: { name: string; href: string; icon: typeof LayoutDashboard }[] = [];
