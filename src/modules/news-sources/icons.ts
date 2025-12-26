@@ -1,16 +1,16 @@
 import {
-  Binary,
-  Blocks,
-  Brain,
-  Code2,
-  Globe,
-  Mic,
-  Newspaper,
-  Radio,
-  Rocket,
-  Rss,
-  Tv,
-  type LucideIcon,
+    Binary,
+    Blocks,
+    Brain,
+    Code2,
+    Globe,
+    Mic,
+    Newspaper,
+    Radio,
+    Rocket,
+    Rss,
+    Tv,
+    type LucideIcon,
 } from "lucide-react";
 import type { BrandColor, SourceIcon } from "./types";
 
