@@ -71,6 +71,51 @@ export function formatTime(seconds: number): string {
 }
 
 /**
+ * Parse a time string (MM:SS or HH:MM:SS) into seconds
+ * Returns null if the format is invalid
+ */
+export function parseTime(timeStr: string): number | null {
+  const trimmed = timeStr.trim();
+  const parts = trimmed.split(":");
+
+  if (parts.length < 2 || parts.length > 3) {
+    return null;
+  }
+
+  const numbers = parts.map((p) => {
+    // Check for decimal points or non-integer values
+    if (p.includes(".")) {
+      return null;
+    }
+    const num = parseInt(p, 10);
+    return isNaN(num) || num < 0 ? null : num;
+  });
+
+  if (numbers.some((n) => n === null)) {
+    return null;
+  }
+
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+
+  if (parts.length === 3) {
+    // HH:MM:SS
+    [hours, minutes, seconds] = numbers as number[];
+  } else {
+    // MM:SS
+    [minutes, seconds] = numbers as number[];
+  }
+
+  // Validate ranges
+  if (minutes >= 60 || seconds >= 60) {
+    return null;
+  }
+
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+/**
  * Calculate remaining seconds for a running timer based on end_time
  */
 export function calculateRemainingSeconds(

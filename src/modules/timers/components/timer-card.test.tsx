@@ -328,4 +328,138 @@ describe("TimerCard", () => {
       setIntervalSpy.mockRestore();
     });
   });
+
+  describe("countdown display editing", () => {
+    it("allows editing when timer is stopped", async () => {
+      render(<TimerCard timer={baseTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      const input = screen.getByRole("textbox");
+      expect(input).toBeInTheDocument();
+      expect(input).toHaveValue("5:00");
+    });
+
+    it("does not allow editing when timer is running", async () => {
+      const runningTimer = {
+        ...baseTimer,
+        state: "running" as const,
+        endTime: new Date(Date.now() + 300000),
+      };
+
+      render(<TimerCard timer={runningTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    });
+
+    it("updates timer when valid time is entered", async () => {
+      mockUpdateTimer.mockResolvedValue({ success: true });
+
+      render(<TimerCard timer={baseTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      const input = screen.getByRole("textbox");
+      await userEvent.clear(input);
+      await userEvent.type(input, "19:11:00");
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(mockUpdateTimer).toHaveBeenCalledWith("timer-1", {
+          remainingSeconds: 69060,
+          state: "idle",
+          endTime: null,
+        });
+      });
+    });
+
+    it("cancels editing on Escape key", async () => {
+      render(<TimerCard timer={baseTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      const input = screen.getByRole("textbox");
+      expect(input).toBeInTheDocument();
+
+      await userEvent.keyboard("{Escape}");
+
+      await waitFor(() => {
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+      });
+      expect(mockUpdateTimer).not.toHaveBeenCalled();
+    });
+
+    it("saves on Enter key", async () => {
+      mockUpdateTimer.mockResolvedValue({ success: true });
+
+      render(<TimerCard timer={baseTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      const input = screen.getByRole("textbox");
+      await userEvent.clear(input);
+      await userEvent.type(input, "2:30{Enter}");
+
+      await waitFor(() => {
+        expect(mockUpdateTimer).toHaveBeenCalledWith("timer-1", {
+          remainingSeconds: 150,
+          state: "idle",
+          endTime: null,
+        });
+      });
+    });
+
+    it("does not update if value is invalid", async () => {
+      render(<TimerCard timer={baseTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      const input = screen.getByRole("textbox");
+      await userEvent.clear(input);
+      await userEvent.type(input, "invalid");
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+      });
+      expect(mockUpdateTimer).not.toHaveBeenCalled();
+    });
+
+    it("does not update if value is unchanged", async () => {
+      render(<TimerCard timer={baseTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      // Just tab out without changing the value
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+      });
+      expect(mockUpdateTimer).not.toHaveBeenCalled();
+    });
+
+    it("selects all text when editing starts", async () => {
+      render(<TimerCard timer={baseTimer} />);
+
+      const display = screen.getByText("5:00");
+      await userEvent.click(display);
+
+      const inputElement = screen.getByRole("textbox") as HTMLInputElement;
+
+      await waitFor(() => {
+        expect(inputElement.selectionStart).toBe(0);
+        expect(inputElement.selectionEnd).toBe(4); // "5:00" length
+      });
+    });
+  });
 });

@@ -8,12 +8,13 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Pause, Play, RotateCcw, Timer as TimerIcon, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { deleteTimer, pauseTimer, resetTimer, startTimer, updateTimer } from "../actions";
 import type { Timer } from "../types";
-import { formatTime, getProgress } from "../types";
+import { formatTime, getProgress, parseTime } from "../types";
 
 interface TimerCardProps {
   timer: Timer;
@@ -24,8 +25,11 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
   const [timer, setTimer] = useState(initialTimer);
   const [localRemaining, setLocalRemaining] = useState(timer.remainingSeconds);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
   const hasCompletedRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync with prop changes
   useEffect(() => {
@@ -119,6 +123,43 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
     }
   };
 
+  const handleStartEdit = () => {
+    if (timer.state === "running") return; // Can't edit while running
+    setEditValue(formatTime(localRemaining));
+    setIsEditing(true);
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value);
+  };
+
+  const handleEditBlur = async () => {
+    const newSeconds = parseTime(editValue);
+    if (newSeconds !== null && newSeconds !== localRemaining) {
+      setLocalRemaining(newSeconds);
+      // Update the timer with new remaining time
+      await updateTimer(timer.id, {
+        remainingSeconds: newSeconds,
+        state: "idle",
+        endTime: null,
+      });
+      onUpdate?.();
+    }
+    setIsEditing(false);
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      inputRef.current?.blur();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+    }
+  };
+
   const progress = getProgress({
     ...timer,
     remainingSeconds: localRemaining,
@@ -157,18 +198,41 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
       <CardContent>
         <div className="space-y-4">
           <div className="text-center">
-            <div
-              className={`text-4xl font-bold tabular-nums ${
-                isCompleted ? "text-destructive" : ""
-              }`}
-              style={
-                isCompleted && timer.enableCompletionColor
-                  ? { color: timer.completionColor }
-                  : {}
-              }
-            >
-              {formatTime(localRemaining)}
-            </div>
+            {isEditing ? (
+              <Input
+                ref={inputRef}
+                type="text"
+                value={editValue}
+                onChange={handleEditChange}
+                onBlur={handleEditBlur}
+                onKeyDown={handleEditKeyDown}
+                className="text-4xl font-bold tabular-nums text-center h-auto py-2 border-2"
+                placeholder="HH:MM:SS"
+              />
+            ) : (
+              <div
+                className={`text-4xl font-bold tabular-nums cursor-pointer hover:opacity-80 transition-opacity ${
+                  isCompleted ? "text-destructive" : ""
+                } ${timer.state === "running" ? "cursor-default" : ""}`}
+                style={
+                  isCompleted && timer.enableCompletionColor
+                    ? { color: timer.completionColor }
+                    : {}
+                }
+                onClick={handleStartEdit}
+                role="button"
+                tabIndex={timer.state === "running" ? -1 : 0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleStartEdit();
+                  }
+                }}
+                aria-label="Click to edit time"
+              >
+                {formatTime(localRemaining)}
+              </div>
+            )}
           </div>
 
           <Progress value={progress} className="h-2" />

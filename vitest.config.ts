@@ -13,6 +13,9 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "test-key",
       SUPABASE_SECRET_SERVICE_ROLE_KEY: "test-secret",
       NEXT_PUBLIC_SITE_URL: "http://localhost:5001",
+      UPSTASH_REDIS_REST_URL: "https://test.upstash.io",
+      UPSTASH_REDIS_REST_TOKEN: "test-token",
+      RESEND_API_KEY: "re_test_key",
     },
     coverage: {
       provider: "v8",

@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import {
-  calculateRemainingSeconds,
-  formatTime,
-  getProgress,
-  syncTimerState,
-  TIMER_PRESETS,
-} from "./types";
 import type { Timer, TimerState } from "./types";
+import {
+    calculateRemainingSeconds,
+    formatTime,
+    getProgress,
+    parseTime,
+    syncTimerState,
+    TIMER_PRESETS,
+} from "./types";
 
 describe("timers types", () => {
   describe("TIMER_PRESETS", () => {
@@ -43,6 +44,60 @@ describe("timers types", () => {
 
     it("pads single digit minutes when hours present", () => {
       expect(formatTime(3605)).toBe("1:00:05");
+    });
+  });
+
+  describe("parseTime", () => {
+    it("parses MM:SS format", () => {
+      expect(parseTime("2:05")).toBe(125);
+      expect(parseTime("0:45")).toBe(45);
+      expect(parseTime("10:30")).toBe(630);
+    });
+
+    it("parses HH:MM:SS format", () => {
+      expect(parseTime("1:01:05")).toBe(3665);
+      expect(parseTime("2:30:00")).toBe(9000);
+      expect(parseTime("0:05:30")).toBe(330);
+    });
+
+    it("handles leading zeros", () => {
+      expect(parseTime("01:05")).toBe(65);
+      expect(parseTime("00:01:05")).toBe(65);
+    });
+
+    it("handles the user's example", () => {
+      // 19 hours, 11 minutes, 0 seconds = 19*3600 + 11*60 + 0 = 68400 + 660 = 69060
+      expect(parseTime("19:11:00")).toBe(69060);
+    });
+
+    it("returns null for invalid formats", () => {
+      expect(parseTime("")).toBeNull();
+      expect(parseTime("5")).toBeNull();
+      expect(parseTime("5:")).toBeNull();
+      expect(parseTime(":5")).toBeNull();
+      expect(parseTime("1:2:3:4")).toBeNull();
+    });
+
+    it("returns null for negative numbers", () => {
+      expect(parseTime("-1:30")).toBeNull();
+      expect(parseTime("1:-30")).toBeNull();
+    });
+
+    it("returns null for invalid ranges", () => {
+      expect(parseTime("1:60")).toBeNull(); // seconds >= 60
+      expect(parseTime("60:30")).toBeNull(); // minutes >= 60
+      expect(parseTime("1:61:30")).toBeNull(); // minutes >= 60
+    });
+
+    it("returns null for non-numeric values", () => {
+      expect(parseTime("abc")).toBeNull();
+      expect(parseTime("1:abc")).toBeNull();
+      expect(parseTime("1.5:30")).toBeNull();
+    });
+
+    it("handles whitespace", () => {
+      expect(parseTime("  2:05  ")).toBe(125);
+      expect(parseTime(" 1:01:05 ")).toBe(3665);
     });
   });
 

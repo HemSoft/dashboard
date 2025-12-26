@@ -14,7 +14,7 @@ import { Check, Loader2, Pencil, X } from "lucide-react";
 import { useState, useTransition } from "react";
 import { updateExpenditureSource } from "../actions";
 import type { BillingCycle, ExpenditureSource } from "../types";
-import { formatBillingCycle, formatCurrency, getMonthName, MONTH_NAMES } from "../types";
+import { calculateMonthlyCost, formatBillingCycle, formatCurrency, getMonthName, MONTH_NAMES } from "../types";
 
 interface ExpenditureItemProps {
   readonly source: ExpenditureSource;
@@ -235,9 +235,16 @@ export function ExpenditureItem({ source }: ExpenditureItemProps) {
       <div className="flex items-center gap-4">
         <div className="text-right">
           <div className="text-lg font-semibold">
-            {formatCurrency(source.baseCost + source.consumptionCost)}
+            {source.billingCycle === "yearly"
+              ? formatCurrency(calculateMonthlyCost(source))
+              : formatCurrency(source.baseCost + source.consumptionCost)}
           </div>
-          <div className="text-xs text-muted-foreground">Total</div>
+          <div className="text-xs text-muted-foreground">Monthly</div>
+          {source.billingCycle === "yearly" && (
+            <div className="text-xs text-muted-foreground">
+              ({formatCurrency(source.baseCost + source.consumptionCost)}/yr)
+            </div>
+          )}
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)}>
           <Pencil className="h-4 w-4" />
