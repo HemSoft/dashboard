@@ -106,6 +106,62 @@ export function setStoredBrightness(settings: BrightnessSettings): void {
   localStorage.setItem("brightness-settings", JSON.stringify(settings));
 }
 
+// Variables that need brightness adjustments
+const FOREGROUND_VARS = [
+  "--foreground",
+  "--primary-foreground",
+  "--secondary-foreground",
+  "--accent-foreground",
+  "--muted-foreground",
+  "--card-foreground",
+  "--popover-foreground",
+  "--sidebar-foreground",
+  "--sidebar-primary-foreground",
+  "--sidebar-accent-foreground",
+];
+
+const BACKGROUND_VARS = [
+  "--background",
+  "--primary",
+  "--secondary",
+  "--accent",
+  "--muted",
+  "--card",
+  "--popover",
+  "--sidebar",
+  "--sidebar-primary",
+  "--sidebar-accent",
+];
+
+const ALL_BRIGHTNESS_VARS = [...FOREGROUND_VARS, ...BACKGROUND_VARS];
+
+/**
+ * Apply brightness to a set of CSS variables
+ */
+function applyBrightnessToVars(
+  vars: readonly string[],
+  brightness: number,
+  computedStyle: CSSStyleDeclaration,
+  root: HTMLElement
+): void {
+  for (const varName of vars) {
+    const value = computedStyle.getPropertyValue(varName).trim();
+    if (value && value.startsWith("oklch")) {
+      const adjusted = adjustOklchColor(value, brightness);
+      root.style.setProperty(varName, adjusted);
+    }
+  }
+}
+
+/**
+ * Clear inline styles for all brightness-related variables
+ */
+function clearBrightnessStyles(root: HTMLElement): void {
+  for (const varName of ALL_BRIGHTNESS_VARS) {
+    root.style.removeProperty(varName);
+  }
+}
+
 /**
  * Apply brightness adjustments to document CSS variables
  * @param settings Brightness settings
@@ -121,54 +177,21 @@ export function applyBrightnessToDocument(
   const fg = isDark ? settings.fgDark : settings.fgLight;
   const bg = isDark ? settings.bgDark : settings.bgLight;
 
-  // Get all CSS variables
+  // If brightness is at defaults, just reset and return
+  if (fg === 100 && bg === 100) {
+    clearBrightnessStyles(root);
+    return;
+  }
+
+  // First, remove any inline styles to get the original CSS values
+  clearBrightnessStyles(root);
+
+  // Now read the original computed styles (from CSS, not inline)
   const computedStyle = getComputedStyle(root);
 
-  // Foreground-related variables (text colors)
-  const fgVars = [
-    "--foreground",
-    "--primary-foreground",
-    "--secondary-foreground",
-    "--accent-foreground",
-    "--muted-foreground",
-    "--card-foreground",
-    "--popover-foreground",
-    "--sidebar-foreground",
-    "--sidebar-primary-foreground",
-    "--sidebar-accent-foreground",
-  ];
-
-  // Background-related variables
-  const bgVars = [
-    "--background",
-    "--primary",
-    "--secondary",
-    "--accent",
-    "--muted",
-    "--card",
-    "--popover",
-    "--sidebar",
-    "--sidebar-primary",
-    "--sidebar-accent",
-  ];
-
-  // Apply foreground adjustments
-  for (const varName of fgVars) {
-    const value = computedStyle.getPropertyValue(varName).trim();
-    if (value && value.startsWith("oklch")) {
-      const adjusted = adjustOklchColor(value, fg);
-      root.style.setProperty(varName, adjusted);
-    }
-  }
-
-  // Apply background adjustments
-  for (const varName of bgVars) {
-    const value = computedStyle.getPropertyValue(varName).trim();
-    if (value && value.startsWith("oklch")) {
-      const adjusted = adjustOklchColor(value, bg);
-      root.style.setProperty(varName, adjusted);
-    }
-  }
+  // Apply adjustments
+  applyBrightnessToVars(FOREGROUND_VARS, fg, computedStyle, root);
+  applyBrightnessToVars(BACKGROUND_VARS, bg, computedStyle, root);
 }
 
 /**
@@ -176,32 +199,5 @@ export function applyBrightnessToDocument(
  */
 export function resetBrightnessOnDocument(): void {
   if (typeof document === "undefined") return;
-
-  const root = document.documentElement;
-  const allVars = [
-    "--foreground",
-    "--background",
-    "--primary",
-    "--primary-foreground",
-    "--secondary",
-    "--secondary-foreground",
-    "--accent",
-    "--accent-foreground",
-    "--muted",
-    "--muted-foreground",
-    "--card",
-    "--card-foreground",
-    "--popover",
-    "--popover-foreground",
-    "--sidebar",
-    "--sidebar-foreground",
-    "--sidebar-primary",
-    "--sidebar-primary-foreground",
-    "--sidebar-accent",
-    "--sidebar-accent-foreground",
-  ];
-
-  for (const varName of allVars) {
-    root.style.removeProperty(varName);
-  }
+  clearBrightnessStyles(document.documentElement);
 }

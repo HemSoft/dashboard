@@ -219,17 +219,19 @@ describe("brightness utilities", () => {
         expect(bgLightness).toBeGreaterThan(0.9); // brightened with dark mode setting
       });
 
-      it("handles default brightness (100) without changes", () => {
-        applyBrightnessToDocument(DEFAULT_BRIGHTNESS, false);
+      it("resets inline styles when brightness is at defaults (100)", () => {
+        // First apply non-default brightness to set some inline styles
+        applyBrightnessToDocument({ fgLight: 150, bgLight: 150, fgDark: 100, bgDark: 100 }, false);
 
         const root = document.documentElement;
-        const fgValue = root.style.getPropertyValue("--foreground");
+        expect(root.style.getPropertyValue("--foreground")).toBeTruthy();
 
-        // Should still set values even at 100%
-        expect(fgValue).toBeTruthy();
+        // Now apply default brightness - should remove inline styles
+        applyBrightnessToDocument(DEFAULT_BRIGHTNESS, false);
 
-        const fgLightness = parseOklchLightness(fgValue);
-        expect(fgLightness).toBe(0.5); // unchanged
+        // Inline styles should be cleared when at defaults
+        expect(root.style.getPropertyValue("--foreground")).toBe("");
+        expect(root.style.getPropertyValue("--background")).toBe("");
       });
     });
 
