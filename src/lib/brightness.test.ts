@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
     adjustLightness,
     adjustOklchColor,
@@ -146,34 +146,18 @@ describe("brightness utilities", () => {
 
   describe("document operations", () => {
     beforeEach(() => {
-      // Reset document styles
       document.documentElement.style.cssText = "";
-
-      // Mock getComputedStyle
-      vi.spyOn(window, "getComputedStyle").mockReturnValue({
-        getPropertyValue: (prop: string) => {
-          const mockStyles: Record<string, string> = {
-            "--foreground": "oklch(0.5 0.2 180)",
-            "--background": "oklch(0.9 0.1 180)",
-            "--primary": "oklch(0.3 0.25 240)",
-            "--primary-foreground": "oklch(0.95 0.05 240)",
-            "--muted": "oklch(0.85 0.05 180)",
-            "--muted-foreground": "oklch(0.4 0.15 180)",
-          };
-          return mockStyles[prop] || "";
-        },
-      } as CSSStyleDeclaration);
     });
 
     afterEach(() => {
-      vi.restoreAllMocks();
+      document.documentElement.style.cssText = "";
     });
 
     describe("applyBrightnessToDocument", () => {
-      it("applies brightness adjustments to CSS variables", () => {
+      it("applies CSS filter when brightness is not default", () => {
         const settings: BrightnessSettings = {
-          fgLight: 150,
-          bgLight: 80,
+          fgLight: 120,
+          bgLight: 120,
           fgDark: 100,
           bgDark: 100,
         };
@@ -181,82 +165,106 @@ describe("brightness utilities", () => {
         applyBrightnessToDocument(settings, false);
 
         const root = document.documentElement;
-        const fgValue = root.style.getPropertyValue("--foreground");
-        const bgValue = root.style.getPropertyValue("--background");
+        const filter = root.style.getPropertyValue("filter");
 
-        expect(fgValue).toBeTruthy();
-        expect(bgValue).toBeTruthy();
-
-        // Check that values were adjusted
-        const fgLightness = parseOklchLightness(fgValue);
-        const bgLightness = parseOklchLightness(bgValue);
-
-        expect(fgLightness).toBeGreaterThan(0.5); // brightened
-        expect(bgLightness).toBeLessThan(0.9); // darkened
+        // Combined brightness is (120 + 120) / 2 = 120, so 1.2
+        expect(filter).toBe("brightness(1.2)");
       });
 
-      it("uses dark mode settings when isDark is true", () => {
+      it("applies correct filter value for dark mode", () => {
         const settings: BrightnessSettings = {
           fgLight: 100,
           bgLight: 100,
-          fgDark: 50,
-          bgDark: 150,
+          fgDark: 80,
+          bgDark: 80,
         };
 
         applyBrightnessToDocument(settings, true);
 
         const root = document.documentElement;
-        const fgValue = root.style.getPropertyValue("--foreground");
-        const bgValue = root.style.getPropertyValue("--background");
+        const filter = root.style.getPropertyValue("filter");
 
-        expect(fgValue).toBeTruthy();
-        expect(bgValue).toBeTruthy();
-
-        const fgLightness = parseOklchLightness(fgValue);
-        const bgLightness = parseOklchLightness(bgValue);
-
-        expect(fgLightness).toBeLessThan(0.5); // darkened with dark mode setting
-        expect(bgLightness).toBeGreaterThan(0.9); // brightened with dark mode setting
+        // Combined brightness is (80 + 80) / 2 = 80, so 0.8
+        expect(filter).toBe("brightness(0.8)");
       });
 
-      it("resets inline styles when brightness is at defaults (100)", () => {
-        // First apply non-default brightness to set some inline styles
+      it("removes filter when brightness is at default", () => {
+        // First apply non-default brightness
         applyBrightnessToDocument({ fgLight: 150, bgLight: 150, fgDark: 100, bgDark: 100 }, false);
 
         const root = document.documentElement;
-        expect(root.style.getPropertyValue("--foreground")).toBeTruthy();
+        expect(root.style.getPropertyValue("filter")).toBeTruthy();
 
-        // Now apply default brightness - should remove inline styles
+        // Now apply default brightness
         applyBrightnessToDocument(DEFAULT_BRIGHTNESS, false);
 
-        // Inline styles should be cleared when at defaults
-        expect(root.style.getPropertyValue("--foreground")).toBe("");
-        expect(root.style.getPropertyValue("--background")).toBe("");
+        expect(root.style.getPropertyValue("filter")).toBe("");
       });
-    });
 
-    describe("resetBrightnessOnDocument", () => {
-      it("removes all brightness adjustments", () => {
+      it("calculates combined brightness correctly for asymmetric values", () => {
         const settings: BrightnessSettings = {
-          fgLight: 150,
-          bgLight: 80,
+          fgLight: 140,
+          bgLight: 120,
           fgDark: 100,
           bgDark: 100,
         };
 
-        // First apply
         applyBrightnessToDocument(settings, false);
 
         const root = document.documentElement;
-        expect(root.style.getPropertyValue("--foreground")).toBeTruthy();
-        expect(root.style.getPropertyValue("--background")).toBeTruthy();
+        const filter = root.style.getPropertyValue("filter");
+
+        // Combined brightness is (140 + 120) / 2 = 130, so 1.3
+        expect(filter).toBe("brightness(1.3)");
+      });
+
+      it("handles brightness values above 100", () => {
+        const settings: BrightnessSettings = {
+          fgLight: 150,
+          bgLight: 150,
+          fgDark: 100,
+          bgDark: 100,
+        };
+
+        applyBrightnessToDocument(settings, false);
+
+        const root = document.documentElement;
+        const filter = root.style.getPropertyValue("filter");
+
+        // Combined brightness is (150 + 150) / 2 = 150, so 1.5
+        expect(filter).toBe("brightness(1.5)");
+      });
+
+      it("handles brightness values below 100", () => {
+        const settings: BrightnessSettings = {
+          fgLight: 50,
+          bgLight: 50,
+          fgDark: 100,
+          bgDark: 100,
+        };
+
+        applyBrightnessToDocument(settings, false);
+
+        const root = document.documentElement;
+        const filter = root.style.getPropertyValue("filter");
+
+        // Combined brightness is (50 + 50) / 2 = 50, so 0.5
+        expect(filter).toBe("brightness(0.5)");
+      });
+    });
+
+    describe("resetBrightnessOnDocument", () => {
+      it("removes the filter", () => {
+        // First apply brightness
+        applyBrightnessToDocument({ fgLight: 150, bgLight: 150, fgDark: 100, bgDark: 100 }, false);
+
+        const root = document.documentElement;
+        expect(root.style.getPropertyValue("filter")).toBeTruthy();
 
         // Then reset
         resetBrightnessOnDocument();
 
-        expect(root.style.getPropertyValue("--foreground")).toBe("");
-        expect(root.style.getPropertyValue("--background")).toBe("");
-        expect(root.style.getPropertyValue("--primary")).toBe("");
+        expect(root.style.getPropertyValue("filter")).toBe("");
       });
     });
   });

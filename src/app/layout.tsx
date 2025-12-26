@@ -4,6 +4,7 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import { APP_NAME } from "@/lib/version";
 import { NotificationBellServer } from "@/modules/notifications/components/notification-bell-server";
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import {
     Fira_Code,
@@ -203,6 +204,7 @@ export default async function RootLayout({
         ) : (
           <main className="h-screen w-full">{children}</main>
         )}
+        <Analytics />
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 /**
- * Brightness adjustment utilities for OKLCH color values
+ * Brightness adjustment utilities using CSS filters
  *
  * Brightness values range from 0-200 where:
  * - 100 = default (no adjustment)
@@ -106,64 +106,8 @@ export function setStoredBrightness(settings: BrightnessSettings): void {
   localStorage.setItem("brightness-settings", JSON.stringify(settings));
 }
 
-// Variables that need brightness adjustments
-const FOREGROUND_VARS = [
-  "--foreground",
-  "--primary-foreground",
-  "--secondary-foreground",
-  "--accent-foreground",
-  "--muted-foreground",
-  "--card-foreground",
-  "--popover-foreground",
-  "--sidebar-foreground",
-  "--sidebar-primary-foreground",
-  "--sidebar-accent-foreground",
-];
-
-const BACKGROUND_VARS = [
-  "--background",
-  "--primary",
-  "--secondary",
-  "--accent",
-  "--muted",
-  "--card",
-  "--popover",
-  "--sidebar",
-  "--sidebar-primary",
-  "--sidebar-accent",
-];
-
-const ALL_BRIGHTNESS_VARS = [...FOREGROUND_VARS, ...BACKGROUND_VARS];
-
 /**
- * Apply brightness to a set of CSS variables
- */
-function applyBrightnessToVars(
-  vars: readonly string[],
-  brightness: number,
-  computedStyle: CSSStyleDeclaration,
-  root: HTMLElement
-): void {
-  for (const varName of vars) {
-    const value = computedStyle.getPropertyValue(varName).trim();
-    if (value && value.startsWith("oklch")) {
-      const adjusted = adjustOklchColor(value, brightness);
-      root.style.setProperty(varName, adjusted);
-    }
-  }
-}
-
-/**
- * Clear inline styles for all brightness-related variables
- */
-function clearBrightnessStyles(root: HTMLElement): void {
-  for (const varName of ALL_BRIGHTNESS_VARS) {
-    root.style.removeProperty(varName);
-  }
-}
-
-/**
- * Apply brightness adjustments to document CSS variables
+ * Apply brightness adjustments to document using CSS filter
  * @param settings Brightness settings
  * @param isDark Whether dark mode is active
  */
@@ -177,27 +121,26 @@ export function applyBrightnessToDocument(
   const fg = isDark ? settings.fgDark : settings.fgLight;
   const bg = isDark ? settings.bgDark : settings.bgLight;
 
-  // If brightness is at defaults, just reset and return
-  if (fg === 100 && bg === 100) {
-    clearBrightnessStyles(root);
+  // Calculate combined brightness (average of fg and bg)
+  // This is a simplification - we apply one filter to the whole page
+  const combinedBrightness = (fg + bg) / 2;
+
+  // If brightness is at default, remove the filter
+  if (combinedBrightness === 100) {
+    root.style.removeProperty("filter");
     return;
   }
 
-  // First, remove any inline styles to get the original CSS values
-  clearBrightnessStyles(root);
-
-  // Now read the original computed styles (from CSS, not inline)
-  const computedStyle = getComputedStyle(root);
-
-  // Apply adjustments
-  applyBrightnessToVars(FOREGROUND_VARS, fg, computedStyle, root);
-  applyBrightnessToVars(BACKGROUND_VARS, bg, computedStyle, root);
+  // Convert brightness percentage to CSS filter value
+  // 0 -> 0, 100 -> 1, 200 -> 2
+  const filterValue = combinedBrightness / 100;
+  root.style.setProperty("filter", `brightness(${filterValue})`);
 }
 
 /**
- * Reset brightness adjustments by removing inline styles
+ * Reset brightness adjustments by removing the filter
  */
 export function resetBrightnessOnDocument(): void {
   if (typeof document === "undefined") return;
-  clearBrightnessStyles(document.documentElement);
+  document.documentElement.style.removeProperty("filter");
 }
