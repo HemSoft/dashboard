@@ -8,12 +8,14 @@ const mockDeleteTimer = vi.fn();
 const mockStartTimer = vi.fn();
 const mockPauseTimer = vi.fn();
 const mockResetTimer = vi.fn();
+const mockUpdateTimer = vi.fn();
 
 vi.mock("../actions", () => ({
   deleteTimer: (id: string) => mockDeleteTimer(id),
   startTimer: (id: string) => mockStartTimer(id),
   pauseTimer: (id: string, remaining: number) => mockPauseTimer(id, remaining),
   resetTimer: (id: string) => mockResetTimer(id),
+  updateTimer: (id: string, input: unknown) => mockUpdateTimer(id, input),
 }));
 
 describe("TimerCard", () => {
@@ -37,6 +39,7 @@ describe("TimerCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.confirm = vi.fn(() => true);
+    mockUpdateTimer.mockResolvedValue({ success: true });
   });
 
   it("renders timer name and duration", () => {
@@ -241,7 +244,7 @@ describe("TimerCard", () => {
       expect(screen.getByText("0:04")).toBeInTheDocument();
     });
 
-    it("dispatches timer-complete event when countdown reaches zero", () => {
+    it("dispatches timer-complete event when countdown reaches zero", async () => {
       const dispatchEventSpy = vi.spyOn(window, "dispatchEvent");
       const onUpdate = vi.fn();
       const runningTimer = {
@@ -253,8 +256,15 @@ describe("TimerCard", () => {
 
       render(<TimerCard timer={runningTimer} onUpdate={onUpdate} />);
 
+      // Advance timer to reach 0
       act(() => {
         vi.advanceTimersByTime(1000);
+      });
+
+      // Flush promises for the async handleComplete to run
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
       });
 
       expect(dispatchEventSpy).toHaveBeenCalledWith(

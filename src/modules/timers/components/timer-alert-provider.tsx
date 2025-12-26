@@ -10,14 +10,26 @@ import type { Timer } from "../types";
  */
 export function TimerAlertProvider() {
   const audioContextRef = useRef<AudioContext | null>(null);
-  // Initialize notification permission directly from the API
+  // Use ref to track if initial permission check is done (avoids sync setState in effect)
+  const hasCheckedPermission = useRef(false);
+  // Initialize with "default" to avoid SSR hydration mismatch
   const [notificationPermission, setNotificationPermission] =
-    useState<NotificationPermission>(() => {
+    useState<NotificationPermission>("default");
+
+  // Read actual notification permission on client side only via callback
+  useEffect(() => {
+    if (hasCheckedPermission.current) return;
+    hasCheckedPermission.current = true;
+
+    // Schedule permission check for next tick to avoid sync setState in effect
+    const timeoutId = setTimeout(() => {
       if (typeof window !== "undefined" && "Notification" in window) {
-        return Notification.permission;
+        setNotificationPermission(Notification.permission);
       }
-      return "default";
-    });
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   /**
    * Play a simple alarm tone using Web Audio API

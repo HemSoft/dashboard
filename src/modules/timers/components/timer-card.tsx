@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Pause, Play, RotateCcw, Timer as TimerIcon, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { deleteTimer, pauseTimer, resetTimer, startTimer } from "../actions";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { deleteTimer, pauseTimer, resetTimer, startTimer, updateTimer } from "../actions";
 import type { Timer } from "../types";
 import { formatTime, getProgress } from "../types";
 
@@ -24,14 +24,31 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
   const [timer, setTimer] = useState(initialTimer);
   const [localRemaining, setLocalRemaining] = useState(timer.remainingSeconds);
   const [isDeleting, setIsDeleting] = useState(false);
+  const hasCompletedRef = useRef(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Sync with prop changes
   useEffect(() => {
     setTimer(initialTimer);
     setLocalRemaining(initialTimer.remainingSeconds);
+    // Reset completion flag when timer is reset
+    if (initialTimer.state !== "completed" && initialTimer.remainingSeconds > 0) {
+      hasCompletedRef.current = false;
+    }
   }, [initialTimer]);
 
   const handleComplete = useCallback(async () => {
+    // Guard against double invocation (React Strict Mode)
+    if (hasCompletedRef.current) return;
+    hasCompletedRef.current = true;
+
+    // Persist completed state to database
+    await updateTimer(timer.id, {
+      state: "completed",
+      remainingSeconds: 0,
+      endTime: null,
+    });
+
     // Timer completed - dispatch event for TimerAlertProvider
     // The provider handles both audio (gated by enableAlarm) and notifications independently
     window.dispatchEvent(
@@ -42,24 +59,37 @@ export function TimerCard({ timer: initialTimer, onUpdate }: TimerCardProps) {
     onUpdate?.();
   }, [timer, onUpdate]);
 
+  // Handle timer completion when localRemaining reaches 0
+  useEffect(() => {
+    if (localRemaining <= 0 && timer.state === "running" && !hasCompletedRef.current) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      handleComplete();
+    }
+  }, [localRemaining, timer.state, handleComplete]);
+
   // Client-side countdown for running timers
   useEffect(() => {
     if (timer.state !== "running") return;
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setLocalRemaining((prev) => {
-        const next = prev - 1;
-        if (next <= 0) {
-          clearInterval(interval);
-          handleComplete();
+        if (prev <= 1) {
           return 0;
         }
-        return next;
+        return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [timer.state, handleComplete]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [timer.state]);
 
   const handleStart = async () => {
     await startTimer(timer.id);

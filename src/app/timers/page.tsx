@@ -15,21 +15,35 @@ export default function TimersPage() {
   const [error, setError] = useState<string | undefined>();
   const router = useRouter();
 
+  // Load timers on mount and provide refresh function
+  useEffect(() => {
+    let isMounted = true;
+    const loadTimers = async () => {
+      const result = await getTimers();
+      if (!isMounted) return;
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setError(undefined);
+        setTimers(result.timers);
+      }
+      setLoading(false);
+    };
+    loadTimers();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const loadTimers = useCallback(async () => {
     const result = await getTimers();
     if (result.error) {
       setError(result.error);
     } else {
-      setError(undefined); // Clear error on success
+      setError(undefined);
       setTimers(result.timers);
     }
-    setLoading(false);
   }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadTimers();
-  }, [loadTimers]);
 
   const handleUpdate = () => {
     router.refresh();

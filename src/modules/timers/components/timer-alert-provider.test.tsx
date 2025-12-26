@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Timer } from "../types";
@@ -120,7 +120,7 @@ describe("TimerAlertProvider", () => {
     expect(mockRequestPermission).toHaveBeenCalled();
   });
 
-  it("renders nothing when notification permission is granted", () => {
+  it("renders nothing when notification permission is granted", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
@@ -128,10 +128,13 @@ describe("TimerAlertProvider", () => {
 
     const { container } = render(<TimerAlertProvider />);
 
-    expect(container).toBeEmptyDOMElement();
+    // Wait for the async permission check via setTimeout
+    await waitFor(() => {
+      expect(container).toBeEmptyDOMElement();
+    });
   });
 
-  it("renders nothing when notification permission is denied", () => {
+  it("renders nothing when notification permission is denied", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "denied",
       configurable: true,
@@ -139,16 +142,24 @@ describe("TimerAlertProvider", () => {
 
     const { container } = render(<TimerAlertProvider />);
 
-    expect(container).toBeEmptyDOMElement();
+    // Wait for the async permission check via setTimeout
+    await waitFor(() => {
+      expect(container).toBeEmptyDOMElement();
+    });
   });
 
-  it("plays alarm sound when timer-complete event is dispatched with enableAlarm", () => {
+  it("plays alarm sound when timer-complete event is dispatched with enableAlarm", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
     });
 
     render(<TimerAlertProvider />);
+
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
 
     act(() => {
       window.dispatchEvent(
@@ -165,13 +176,18 @@ describe("TimerAlertProvider", () => {
     expect(mockOscillator.stop).toHaveBeenCalledTimes(3);
   });
 
-  it("does not play alarm sound when enableAlarm is false", () => {
+  it("does not play alarm sound when enableAlarm is false", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
     });
 
     render(<TimerAlertProvider />);
+
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
 
     act(() => {
       window.dispatchEvent(
@@ -184,13 +200,18 @@ describe("TimerAlertProvider", () => {
     expect(mockCreateOscillator).not.toHaveBeenCalled();
   });
 
-  it("shows browser notification when permission is granted", () => {
+  it("shows browser notification when permission is granted", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
     });
 
     render(<TimerAlertProvider />);
+
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
 
     act(() => {
       window.dispatchEvent(
@@ -209,13 +230,18 @@ describe("TimerAlertProvider", () => {
     );
   });
 
-  it("shows browser notification even when audio is disabled", () => {
+  it("shows browser notification even when audio is disabled", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
     });
 
     render(<TimerAlertProvider />);
+
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
 
     act(() => {
       window.dispatchEvent(
@@ -236,13 +262,18 @@ describe("TimerAlertProvider", () => {
     expect(mockCreateOscillator).not.toHaveBeenCalled();
   });
 
-  it("does not show browser notification when permission is denied", () => {
+  it("does not show browser notification when permission is denied", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "denied",
       configurable: true,
     });
 
     render(<TimerAlertProvider />);
+
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
 
     act(() => {
       window.dispatchEvent(
@@ -255,7 +286,7 @@ describe("TimerAlertProvider", () => {
     expect(globalThis.Notification).not.toHaveBeenCalled();
   });
 
-  it("cleans up event listener and AudioContext on unmount", () => {
+  it("cleans up event listener and AudioContext on unmount", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
@@ -264,6 +295,12 @@ describe("TimerAlertProvider", () => {
     const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
     const { unmount } = render(<TimerAlertProvider />);
+
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
+
     unmount();
 
     expect(removeEventListenerSpy).toHaveBeenCalledWith(
@@ -275,7 +312,7 @@ describe("TimerAlertProvider", () => {
     removeEventListenerSpy.mockRestore();
   });
 
-  it("handles AudioContext close errors gracefully", () => {
+  it("handles AudioContext close errors gracefully", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
@@ -285,11 +322,16 @@ describe("TimerAlertProvider", () => {
 
     const { unmount } = render(<TimerAlertProvider />);
 
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
+
     // Should not throw
     expect(() => unmount()).not.toThrow();
   });
 
-  it("handles error in playAlarmSound gracefully", () => {
+  it("handles error in playAlarmSound gracefully", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
@@ -302,6 +344,11 @@ describe("TimerAlertProvider", () => {
     });
 
     render(<TimerAlertProvider />);
+
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(screen.queryByText("Enable Notifications")).not.toBeInTheDocument();
+    });
 
     act(() => {
       window.dispatchEvent(
@@ -319,7 +366,7 @@ describe("TimerAlertProvider", () => {
     consoleError.mockRestore();
   });
 
-  it("handles missing AudioContext gracefully", () => {
+  it("handles missing AudioContext gracefully", async () => {
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,
@@ -332,6 +379,11 @@ describe("TimerAlertProvider", () => {
 
     const { container } = render(<TimerAlertProvider />);
 
+    // Wait for permission state to update
+    await waitFor(() => {
+      expect(container).toBeEmptyDOMElement();
+    });
+
     // Should not throw when timer-complete is dispatched
     act(() => {
       window.dispatchEvent(
@@ -340,9 +392,6 @@ describe("TimerAlertProvider", () => {
         })
       );
     });
-
-    // Verify the component rendered without crashing
-    expect(container).toBeEmptyDOMElement();
 
     // Restore
     globalThis.AudioContext = savedAudioContext;

@@ -10,13 +10,67 @@ import {
 import { AlertTriangle, Timer as TimerIcon } from "lucide-react";
 import Link from "next/link";
 import { getTimers } from "../actions";
+import type { Timer } from "../types";
 import { formatTime } from "../types";
+
+function EmptyTimersView() {
+  return (
+    <div className="text-center py-4">
+      <p className="text-sm text-muted-foreground mb-3">No timers configured</p>
+      <Button variant="outline" size="sm" asChild>
+        <Link href="/timers">Create Timer</Link>
+      </Button>
+    </div>
+  );
+}
+
+function TimersSummaryView({ timers, nextTimer }: { timers: Timer[]; nextTimer: Timer | null }) {
+  if (nextTimer) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm text-muted-foreground">Currently running:</div>
+            <div className="text-sm font-medium">{nextTimer.name}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-lg font-bold tabular-nums">
+              {formatTime(nextTimer.remainingSeconds)}
+            </div>
+            <div className="text-xs text-muted-foreground">remaining</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="text-center py-2">
+        <div className="text-sm text-muted-foreground">
+          {timers.length} timer{timers.length !== 1 ? "s" : ""} ready
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TimersContent({ timers, error }: { timers: Timer[]; error: string | undefined }) {
+  if (timers.length === 0 && !error) {
+    return <EmptyTimersView />;
+  }
+
+  if (timers.length > 0) {
+    const runningTimers = timers.filter((t) => t.state === "running");
+    const nextTimer = runningTimers.length > 0 ? runningTimers[0] : null;
+    return <TimersSummaryView timers={timers} nextTimer={nextTimer} />;
+  }
+
+  return null;
+}
 
 export async function TimerWidget() {
   const { timers, error } = await getTimers();
-
-  const runningTimers = timers.filter((t) => t.state === "running");
-  const nextTimer = runningTimers.length > 0 ? runningTimers[0] : null;
 
   return (
     <Card>
@@ -48,41 +102,7 @@ export async function TimerWidget() {
             <span>{error}</span>
           </div>
         )}
-        {timers.length === 0 && !error ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-muted-foreground mb-3">
-              No timers configured
-            </p>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/timers">Create Timer</Link>
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {nextTimer ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-muted-foreground">
-                    Currently running:
-                  </div>
-                  <div className="text-sm font-medium">{nextTimer.name}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg font-bold tabular-nums">
-                    {formatTime(nextTimer.remainingSeconds)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">remaining</div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-2">
-                <div className="text-sm text-muted-foreground">
-                  {timers.length} timer{timers.length !== 1 ? "s" : ""} ready
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <TimersContent timers={timers} error={error} />
       </CardContent>
     </Card>
   );
