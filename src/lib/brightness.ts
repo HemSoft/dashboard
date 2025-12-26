@@ -106,8 +106,93 @@ export function setStoredBrightness(settings: BrightnessSettings): void {
   localStorage.setItem("brightness-settings", JSON.stringify(settings));
 }
 
+// CSS variables that represent foreground/text colors
+const FOREGROUND_VARS = [
+  "--foreground",
+  "--primary-foreground",
+  "--secondary-foreground",
+  "--accent-foreground",
+  "--muted-foreground",
+  "--card-foreground",
+  "--popover-foreground",
+  "--sidebar-foreground",
+  "--sidebar-primary-foreground",
+  "--sidebar-accent-foreground",
+];
+
+// CSS variables that represent background/surface colors
+const BACKGROUND_VARS = [
+  "--background",
+  "--primary",
+  "--secondary",
+  "--accent",
+  "--muted",
+  "--card",
+  "--popover",
+  "--border",
+  "--input",
+  "--ring",
+  "--sidebar",
+  "--sidebar-primary",
+  "--sidebar-accent",
+  "--sidebar-border",
+  "--sidebar-ring",
+];
+
+// Store original values to allow proper recalculation
+const originalValues = new Map<string, string>();
+
 /**
- * Apply brightness adjustments to document using CSS filter
+ * Get the original (theme-defined) value of a CSS variable
+ */
+function getOriginalValue(root: HTMLElement, varName: string): string {
+  // Check if we already have it cached
+  const cached = originalValues.get(varName);
+  if (cached) return cached;
+
+  // Get computed style - this includes theme values
+  const computed = getComputedStyle(root).getPropertyValue(varName).trim();
+  if (computed) {
+    originalValues.set(varName, computed);
+    return computed;
+  }
+
+  return "";
+}
+
+/**
+ * Clear cached original values (call when theme changes)
+ */
+export function clearBrightnessCache(): void {
+  originalValues.clear();
+}
+
+/**
+ * Apply brightness adjustment to a list of CSS variables
+ */
+function applyBrightnessToVars(
+  root: HTMLElement,
+  vars: string[],
+  brightness: number
+): void {
+  if (brightness === 100) {
+    for (const varName of vars) {
+      root.style.removeProperty(varName);
+    }
+    return;
+  }
+
+  for (const varName of vars) {
+    const original = getOriginalValue(root, varName);
+    if (original && original.includes("oklch")) {
+      const adjusted = adjustOklchColor(original, brightness);
+      root.style.setProperty(varName, adjusted);
+    }
+  }
+}
+
+/**
+ * Apply brightness adjustments to document CSS variables
  * @param settings Brightness settings
  * @param isDark Whether dark mode is active
  */
@@ -118,29 +203,35 @@ export function applyBrightnessToDocument(
   if (typeof document === "undefined") return;
 
   const root = document.documentElement;
-  const fg = isDark ? settings.fgDark : settings.fgLight;
-  const bg = isDark ? settings.bgDark : settings.bgLight;
+  const fgBrightness = isDark ? settings.fgDark : settings.fgLight;
+  const bgBrightness = isDark ? settings.bgDark : settings.bgLight;
 
-  // Calculate combined brightness (average of fg and bg)
-  // This is a simplification - we apply one filter to the whole page
-  const combinedBrightness = (fg + bg) / 2;
-
-  // If brightness is at default, remove the filter
-  if (combinedBrightness === 100) {
-    root.style.removeProperty("filter");
+  // If both are at default, reset all adjustments
+  if (fgBrightness === 100 && bgBrightness === 100) {
+    resetBrightnessOnDocument();
     return;
   }
 
-  // Convert brightness percentage to CSS filter value
-  // 0 -> 0, 100 -> 1, 200 -> 2
-  const filterValue = combinedBrightness / 100;
-  root.style.setProperty("filter", `brightness(${filterValue})`);
+  applyBrightnessToVars(root, FOREGROUND_VARS, fgBrightness);
+  applyBrightnessToVars(root, BACKGROUND_VARS, bgBrightness);
 }
 
 /**
- * Reset brightness adjustments by removing the filter
+ * Reset brightness adjustments by removing inline style overrides
  */
 export function resetBrightnessOnDocument(): void {
   if (typeof document === "undefined") return;
-  document.documentElement.style.removeProperty("filter");
+
+  const root = document.documentElement;
+
+  // Remove all inline style overrides for brightness-affected variables
+  for (const varName of FOREGROUND_VARS) {
+    root.style.removeProperty(varName);
+  }
+  for (const varName of BACKGROUND_VARS) {
+    root.style.removeProperty(varName);
+  }
+
+  // Clear cached values so they're re-read from theme
+  clearBrightnessCache();
 }

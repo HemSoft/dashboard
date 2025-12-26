@@ -1,6 +1,6 @@
 "use client";
 
-import { applyBrightnessToDocument, getStoredBrightness } from "@/lib/brightness";
+import { applyBrightnessToDocument, clearBrightnessCache, getStoredBrightness } from "@/lib/brightness";
 import {
     type ThemeName,
     applyThemeToDocument,
@@ -54,6 +54,9 @@ export function useTheme() {
     if (!isValidTheme(newTheme)) return;
     setStoredThemeName(newTheme);
     applyThemeToDocument(newTheme);
+
+    // Clear brightness cache so values are re-read from new theme
+    clearBrightnessCache();
 
     // Reapply brightness after theme change
     const brightness = getStoredBrightness();
