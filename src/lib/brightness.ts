@@ -157,6 +157,10 @@ function getOriginalValue(root: HTMLElement, varName: string): string {
     root.style.removeProperty(varName);
   }
 
+  // Force a reflow so getComputedStyle reflects the removal
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  root.offsetHeight;
+
   // Get computed style - this now includes only theme values
   const computed = getComputedStyle(root).getPropertyValue(varName).trim();
 

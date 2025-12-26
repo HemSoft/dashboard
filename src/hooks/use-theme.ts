@@ -44,7 +44,8 @@ export function useTheme() {
   useEffect(() => {
     applyThemeToDocument(theme);
 
-    // Apply brightness adjustments after theme is applied
+    // Clear brightness cache and apply adjustments after theme is applied
+    clearBrightnessCache();
     const brightness = getStoredBrightness();
     const isDark = document.documentElement.classList.contains("dark");
     applyBrightnessToDocument(brightness, isDark);
@@ -80,7 +81,8 @@ export function useThemeInit(serverTheme?: string | null) {
     if (stored !== "default") {
       applyThemeToDocument(stored);
 
-      // Apply brightness adjustments
+      // Clear brightness cache and apply adjustments
+      clearBrightnessCache();
       const brightness = getStoredBrightness();
       const isDark = document.documentElement.classList.contains("dark");
       applyBrightnessToDocument(brightness, isDark);
@@ -91,7 +93,8 @@ export function useThemeInit(serverTheme?: string | null) {
       setStoredThemeName(serverTheme);
       applyThemeToDocument(serverTheme);
 
-      // Apply brightness adjustments
+      // Clear brightness cache and apply adjustments
+      clearBrightnessCache();
       const brightness = getStoredBrightness();
       const isDark = document.documentElement.classList.contains("dark");
       applyBrightnessToDocument(brightness, isDark);
@@ -100,7 +103,8 @@ export function useThemeInit(serverTheme?: string | null) {
 
     applyThemeToDocument("default");
 
-    // Apply brightness adjustments
+    // Clear brightness cache and apply adjustments
+    clearBrightnessCache();
     const brightness = getStoredBrightness();
     const isDark = document.documentElement.classList.contains("dark");
     applyBrightnessToDocument(brightness, isDark);
