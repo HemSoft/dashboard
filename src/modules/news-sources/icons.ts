@@ -40,7 +40,7 @@ export const defaultSourceIcon: LucideIcon = Blocks;
  * Get the Lucide icon component for a source icon name.
  */
 export function getSourceIcon(iconName: SourceIcon | string): LucideIcon {
-  if (iconName in sourceIconComponents) {
+  if (Object.hasOwn(sourceIconComponents, iconName)) {
     return sourceIconComponents[iconName as SourceIcon];
   }
   return defaultSourceIcon;
@@ -126,7 +126,7 @@ export const defaultBrandColorClasses = brandColorClasses.gray;
 export function getBrandColorClasses(
   color: BrandColor | string
 ): { bg: string; text: string; border: string } {
-  if (color in brandColorClasses) {
+  if (Object.hasOwn(brandColorClasses, color)) {
     return brandColorClasses[color as BrandColor];
   }
   return defaultBrandColorClasses;

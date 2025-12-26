@@ -60,7 +60,8 @@ export async function getNewsItems(): Promise<FetchNewsItemsResult> {
 
   // Apply source exclusions at database level if user has any
   if (excludedSourceIds.length > 0) {
-    query = query.not("source_id", "in", `(${excludedSourceIds.join(",")})`);
+    const quotedIds = excludedSourceIds.map((id) => `"${id}"`).join(",");
+    query = query.not("source_id", "in", `(${quotedIds})`);
   }
 
   const { data: newsData, error: newsError } = await query;
