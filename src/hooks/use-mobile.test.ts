@@ -15,10 +15,10 @@ describe("useIsMobile", () => {
       onchange: null,
       addListener: vi.fn(),
       removeListener: vi.fn(),
-      addEventListener: vi.fn((event: string, callback: (event: MediaQueryListEvent) => void) => {
+      addEventListener: vi.fn((_, callback: (event: MediaQueryListEvent) => void) => {
         matchMediaListeners.set(query, callback);
       }),
-      removeEventListener: vi.fn((event: string, callback: (event: MediaQueryListEvent) => void) => {
+      removeEventListener: vi.fn(() => {
         matchMediaListeners.delete(query);
       }),
       dispatchEvent: vi.fn(),

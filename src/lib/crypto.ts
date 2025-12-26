@@ -12,7 +12,7 @@ const IV_LENGTH = 16; // 128 bits
  */
 function getEncryptionKey(): Buffer {
   const key = process.env.MAIL_ENCRYPTION_KEY;
-  
+
   if (!key) {
     throw new Error("MAIL_ENCRYPTION_KEY environment variable is not set");
   }
@@ -36,12 +36,12 @@ export function encrypt(plaintext: string): {
 } {
   const key = getEncryptionKey();
   const iv = crypto.randomBytes(IV_LENGTH);
-  
+
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-  
+
   let encrypted = cipher.update(plaintext, "utf8", "hex");
   encrypted += cipher.final("hex");
-  
+
   const authTag = cipher.getAuthTag();
 
   return {
@@ -63,13 +63,13 @@ export function decrypt(
   const key = getEncryptionKey();
   const ivBuffer = Buffer.from(iv, "hex");
   const authTagBuffer = Buffer.from(authTag, "hex");
-  
+
   const decipher = crypto.createDecipheriv(ALGORITHM, key, ivBuffer);
   decipher.setAuthTag(authTagBuffer);
-  
+
   let decrypted = decipher.update(encrypted, "hex", "utf8");
   decrypted += decipher.final("utf8");
-  
+
   return decrypted;
 }
 

@@ -8,6 +8,7 @@ import { ExpendituresWidget } from "@/modules/expenditures";
 import { PRWidget } from "@/modules/github-prs";
 import { MailWidget } from "@/modules/mail/components/mail-widget";
 import { NewsWidget } from "@/modules/news";
+import { TimerWidget } from "@/modules/timers";
 import type { ReactNode } from "react";
 
 export default async function Home() {
@@ -29,6 +30,7 @@ export default async function Home() {
     "pull-requests": <PRWidget />,
     news: <NewsWidget />,
     expenditures: isAdmin ? <ExpendituresWidget /> : null,
+    timers: <TimerWidget />,
     mail: <MailWidget />,
   };
 

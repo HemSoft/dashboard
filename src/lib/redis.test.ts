@@ -1,10 +1,10 @@
-import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  getRedisClient,
-  getCache,
-  setCache,
-  deleteCache,
-  deleteCachePattern,
+    deleteCache,
+    deleteCachePattern,
+    getCache,
+    getRedisClient,
+    setCache,
 } from "./redis";
 
 // Mock @upstash/redis with a class-style mock

@@ -3,13 +3,13 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { getMailAccounts } from "@/modules/mail/actions";
-import { MailList } from "@/modules/mail/components/mail-list";
 import { AccountTabs } from "@/modules/mail/components/account-tabs";
 import { BulkActionBar } from "@/modules/mail/components/bulk-action-bar";
-import type { MailMessage, MailAccount, BulkActionType } from "@/modules/mail/types";
+import { MailList } from "@/modules/mail/components/mail-list";
+import type { BulkActionType, MailAccount, MailMessage } from "@/modules/mail/types";
 import { AlertCircle, Loader2, Mail, Settings } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Mail Page (Client Component)

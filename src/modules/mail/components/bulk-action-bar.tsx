@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { AlertOctagon, Check, CheckCheck, Loader2, Trash2 } from "lucide-react";
 import type { BulkActionType } from "../types";
-import { Check, CheckCheck, Trash2, AlertOctagon, Loader2 } from "lucide-react";
 
 interface BulkActionBarProps {
   selectedCount: number;
@@ -29,9 +29,9 @@ export function BulkActionBar({
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
       <div className="bg-background border rounded-lg shadow-lg p-4 flex items-center gap-3">
         <span className="text-sm font-medium">{selectedCount} selected</span>
-        
+
         <div className="h-6 w-px bg-border" />
-        
+
         {loading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -48,7 +48,7 @@ export function BulkActionBar({
               <Check className="h-4 w-4 mr-1" />
               Read
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -58,7 +58,7 @@ export function BulkActionBar({
               <CheckCheck className="h-4 w-4 mr-1" />
               Unread
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -68,7 +68,7 @@ export function BulkActionBar({
               <AlertOctagon className="h-4 w-4 mr-1" />
               Junk
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -80,9 +80,9 @@ export function BulkActionBar({
             </Button>
           </div>
         )}
-        
+
         <div className="h-6 w-px bg-border" />
-        
+
         <Button variant="ghost" size="sm" onClick={onClearSelection} disabled={loading}>
           Clear
         </Button>
