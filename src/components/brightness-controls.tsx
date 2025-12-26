@@ -6,6 +6,7 @@ import {
     type BrightnessSettings,
     DEFAULT_BRIGHTNESS,
     applyBrightnessToDocument,
+    clearBrightnessCache,
     getStoredBrightness,
     resetBrightnessOnDocument,
     setStoredBrightness,
@@ -60,6 +61,8 @@ export function BrightnessControls({ defaultValues }: BrightnessControlsProps) {
 
   // Apply brightness when settings change
   useEffect(() => {
+    // Clear cache to ensure we read fresh theme values
+    clearBrightnessCache();
     const isDark = document.documentElement.classList.contains("dark");
     applyBrightnessToDocument(settings, isDark);
     setStoredBrightness(settings);

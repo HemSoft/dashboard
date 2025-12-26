@@ -128,6 +128,17 @@ describe("TimerAlertProvider", () => {
   });
 
   it("renders nothing when notification permission is granted", async () => {
+    // Re-establish AudioContext mock for this test
+    class MockAudioContext {
+      createOscillator = mockCreateOscillator;
+      createGain = mockCreateGain;
+      destination = {};
+      currentTime = 0;
+      state = "running";
+      close = mockClose;
+    }
+    globalThis.AudioContext = MockAudioContext as unknown as typeof AudioContext;
+
     Object.defineProperty(globalThis.Notification, "permission", {
       value: "granted",
       configurable: true,

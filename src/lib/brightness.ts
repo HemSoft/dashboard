@@ -144,14 +144,27 @@ const originalValues = new Map<string, string>();
 
 /**
  * Get the original (theme-defined) value of a CSS variable
+ * This temporarily removes inline styles to read the underlying theme value
  */
 function getOriginalValue(root: HTMLElement, varName: string): string {
   // Check if we already have it cached
   const cached = originalValues.get(varName);
   if (cached) return cached;
 
-  // Get computed style - this includes theme values
+  // Temporarily remove any inline style to get the computed (theme) value
+  const inlineValue = root.style.getPropertyValue(varName);
+  if (inlineValue) {
+    root.style.removeProperty(varName);
+  }
+
+  // Get computed style - this now includes only theme values
   const computed = getComputedStyle(root).getPropertyValue(varName).trim();
+
+  // Restore the inline style if it existed
+  if (inlineValue) {
+    root.style.setProperty(varName, inlineValue);
+  }
+
   if (computed) {
     originalValues.set(varName, computed);
     return computed;

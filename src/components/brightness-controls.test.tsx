@@ -20,6 +20,7 @@ vi.mock("@/lib/brightness", () => ({
   setStoredBrightness: vi.fn(),
   applyBrightnessToDocument: vi.fn(),
   resetBrightnessOnDocument: vi.fn(),
+  clearBrightnessCache: vi.fn(),
 }));
 
 describe("BrightnessControls", () => {
