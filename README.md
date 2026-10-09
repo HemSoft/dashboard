@@ -1,8 +1,8 @@
 # Dashboard
 
 <p align="left">
-  <a href="https://github.com/HemSoft/dashboard/deployments"><img src="https://img.shields.io/github/deployments/HemSoft/dashboard/production?label=vercel&logo=vercel&logoColor=white" alt="Vercel Deployment" /></a>
-  <a href="https://github.com/HemSoft/dashboard/blob/main/LICENSE"><img src="https://img.shields.io/github/license/HemSoft/dashboard" alt="License" /></a>
+  <a href="https://github.com/hemsoft-dev/dashboard/deployments"><img src="https://img.shields.io/github/deployments/hemsoft-dev/dashboard/production?label=vercel&logo=vercel&logoColor=white" alt="Vercel Deployment" /></a>
+  <a href="https://github.com/hemsoft-dev/dashboard/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hemsoft-dev/dashboard" alt="License" /></a>
 </p>
 
 ### Built With
